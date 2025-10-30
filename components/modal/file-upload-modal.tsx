@@ -24,6 +24,8 @@ interface Props {
   folderId: number;
 }
 
+const MAX_TOTAL_SIZE = 4 * 1024 * 1024;
+
 export function FileUploadModal({ folderId }: Props) {
   const router = useRouter();
   const ref = useRef<HTMLButtonElement>(null);
@@ -36,10 +38,10 @@ export function FileUploadModal({ folderId }: Props) {
     const _files = Array.from(e.target.files);
 
     // 파일 중 하나라도 20MB 초과하면 에러
-    const isSizeOver = _files.some((file) => file.size > 20 * 1024 * 1024);
+    const isSizeOver = _files.some((file) => file.size > MAX_TOTAL_SIZE);
 
     if (isSizeOver) {
-      toast.error("파일의 용량이 20MB를 초과했습니다.");
+      toast.error("파일의 용량이 4MB를 초과했습니다.");
       return;
     }
 
@@ -96,15 +98,12 @@ export function FileUploadModal({ folderId }: Props) {
         >
           <CloudUpload size={36} />
           <p className="text-sm font-medium">클릭해서 파일을 추가하세요</p>
-          <p className="text-xs font-medium opacity-70">최대용량: 20MB (각 파일)</p>
+          <p className="text-xs font-medium opacity-70">최대용량: 4MB (각 파일)</p>
         </label>
         <input id="files" type="file" multiple hidden onChange={handleChange} />
         <ul className="max-h-80 space-y-2 overflow-y-auto">
           {files.map((file) => (
-            <li
-              key={file.name}
-              className="p-2 text-sm grid grid-cols-12 items-center bg-secondary rounded"
-            >
+            <li key={file.name} className="p-2 text-sm grid grid-cols-12 items-center bg-secondary rounded">
               <div className="col-span-8 truncate">{file.name}</div>
               <div className="col-span-3 ml-auto">{convertByte(file.size)}</div>
               <button
@@ -122,12 +121,7 @@ export function FileUploadModal({ folderId }: Props) {
               닫기
             </DialogClose>
           </Button>
-          <Button
-            type="button"
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            className="shrink w-full"
-          >
+          <Button type="button" onClick={handleSubmit} disabled={isSubmitting} className="shrink w-full">
             {isSubmitting ? <Spinner /> : "업로드"}
           </Button>
         </DialogFooter>
