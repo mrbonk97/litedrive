@@ -9,7 +9,7 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
-const MAX_SIZE = 2_000_000_000;
+const MAX_TOTAL_SIZE = 4 * 1024 * 1024; // 4MB 권장
 
 export async function POST(req: NextRequest, { params }: Props) {
   let conn = null;
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest, { params }: Props) {
     const file = formData.get("file");
     if (!file) throw new Error("업로드 할 파일을 선택해주세요");
     if (!(file instanceof File)) throw new Error("파일 형식이 올바르지 않습니다.");
-    if (file.size > MAX_SIZE) throw new Error("파일의 용량이 20MB를 초과했습니다.");
+    if (file.size > MAX_TOTAL_SIZE) throw new Error("파일의 용량이 4MB를 초과했습니다.");
 
     const pool = await getPool();
     conn = await pool.getConnection();
