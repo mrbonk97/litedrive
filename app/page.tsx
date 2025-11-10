@@ -37,10 +37,10 @@ async function Home() {
         </section>
         <section className="mt-20 bg-secondary">
           <div className="p-4 py-14 sm:py-28 mx-auto max-w-6xl">
-            <h4 className="text-4xl sm:text-5xl font-bold text-center">기능을 살펴보세요</h4>
-            <h5 className="mt-4 sm:mt-8 font-medium text-center opacity-70">몇개 없습니다...</h5>
+            <h4 className="text-4xl sm:text-5xl font-bold">너무 간단합니다.</h4>
+            <h5 className="mt-2 sm:mt-4 font-medium opacity-70">파일 관리에 필요한 핵심 기능을 확인해보세요</h5>
             <div>
-              <p className="mt-20 text-lg sm:text-3xl font-bold opacity-80">1. 대시보드</p>
+              <p className="mt-20 text-lg sm:text-3xl font-bold opacity-80">대시보드</p>
               <Image
                 src={"/static/feature/litedrive-3.png"}
                 alt="feature-dashboard"
@@ -51,7 +51,7 @@ async function Home() {
               />
             </div>
             <div className="mt-40">
-              <p className="mt-20 text-lg sm:text-3xl font-bold opacity-80">2. 파일공유</p>
+              <p className="text-lg sm:text-3xl font-bold opacity-80">파일공유 및 다운로드</p>
               <Image
                 src={"/static/feature/litedrive-5.png"}
                 alt="feature-share-1"
@@ -73,25 +73,24 @@ async function Home() {
         </section>
         <section className="p-4 py-14 sm:py-28 mx-auto max-w-6xl">
           <h2 className="text-2xl sm:text-4xl font-bold leading-relaxed">
-            어차피 무료입니다. <br />
+            평생 무료입니다. <br />
             무엇보다 <span className="text-rose-400">안전</span>하고요. <br />
-            그러니까, 사용해보세요.
+            그러니, 지금 사용해보세요.
           </h2>
 
           <ol className="mt-20 space-y-16">
             <li className="p-4 bg-secondary rounded text-4xl font-bold">
               <strong className="text-rose-400">1.</strong> 보안
-              <p className="p-4 text-sm sm:text-lg font-semibold break-keep">
-                보안 전문가가 직접 설계하고 취약점 검사를 수행한 시스템입니다. LiteDrive는 안전한
-                전송을 최우선으로 생각합니다.
+              <p className="mt-8 text-sm sm:text-lg font-semibold break-keep">
+                보안 전문가가 직접 설계하고 취약점 검사를 수행한 시스템입니다. LiteDrive는 안전한 전송을 최우선으로
+                생각합니다.
               </p>
             </li>
 
             <li className="p-4 bg-secondary rounded text-4xl font-bold">
               <strong className="text-rose-400">2.</strong> 완전한 삭제
-              <p className="p-4 text-sm sm:text-lg font-semibold break-keep">
-                파일 삭제나 회원 탈퇴 시{" "}
-                <span className="text-rose-400">soft delete는 없습니다.</span>
+              <p className="mt-8 text-sm sm:text-lg font-semibold break-keep">
+                파일 삭제나 회원 탈퇴 시 <span className="text-rose-400">soft delete는 없습니다.</span>
                 모든 데이터는 즉시 완전 삭제되어,
                 <span className="text-rose-400">복구가 불가능하도록 설계</span>되었습니다.
               </p>
@@ -99,10 +98,9 @@ async function Home() {
 
             <li className="p-4 bg-secondary rounded text-4xl font-bold">
               <strong className="text-rose-400">3.</strong> 편의성
-              <p className="p-4 text-sm sm:text-lg font-semibold break-keep">
-                단순히 파일만 빠르게 주고받고 싶은데, 매번 2차 인증이 번거로우셨나요? 공용 PC에서
-                개인 계정 로그인이 불안하셨다면, LiteDrive는 가볍게 회원가입 후 바로 사용할 수
-                있습니다.
+              <p className="mt-8 text-sm sm:text-lg font-semibold break-keep">
+                단순히 파일만 빠르게 주고받고 싶은데, 매번 2차 인증이 번거로우셨나요? 공용 PC에서 개인 계정 로그인이
+                불안하셨다면, LiteDrive는 가볍게 회원가입 후 바로 사용할 수 있습니다.
               </p>
             </li>
           </ol>
