@@ -4,7 +4,7 @@ import { getIronSession } from "iron-session";
 import type { NextRequest } from "next/server";
 import { SessionData, sessionOptions } from "@/lib/session";
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const res = NextResponse.next();
 
   const cookie = await cookies();
