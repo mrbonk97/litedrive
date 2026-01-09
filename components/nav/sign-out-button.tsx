@@ -1,16 +1,16 @@
 "use client";
 
-import { safeAwait } from "@/lib/safe-await";
-import { DropdownMenuItem } from "../ui/dropdown-menu";
-import { signOut } from "@/services/user-client";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { safeAwait } from "@/lib/safe-await";
+import { DropdownMenuItem } from "../ui/dropdown-menu";
+import { signOutAction } from "@/actions/auth-action-client";
 
 export function SignOutButton() {
   const router = useRouter();
 
   const handleClick = async () => {
-    const [data, error] = await safeAwait(signOut());
+    const [data, error] = await safeAwait(signOutAction());
     if (error) {
       toast.error(error.message);
     }

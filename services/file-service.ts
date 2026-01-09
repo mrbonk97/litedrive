@@ -1,75 +1,90 @@
-export async function uploadFile(folderId: string, formData: FormData) {
-  const res = await fetch(`/api/folders/${folderId}/upload`, {
-    method: "POST",
-    credentials: "include",
-    body: formData,
-  });
+import { z } from "zod";
+import { db } from "@/db/db";
+import { and, eq } from "drizzle-orm";
+import { files } from "@/db/schema";
+import { toDrizzleSet } from "./service-utils";
+import { patchFileSchema } from "@/schemas/file-schema";
 
-  const { message } = await res.json();
+export async function getFileById(userId: string, fileId: string) {
+  const [file] = await db
+    .select()
+    .from(files)
+    .where(and(eq(files.ownerId, userId), eq(files.id, fileId)));
 
-  if (!res.ok) {
-    throw new Error(message || "파일 업로드 중 오류가 발생했습니다.");
+  if (!file) {
+    throw new Error("FILE NOT FOUND OR UNAUTHORIZED");
   }
 
-  return { message: message || "파일 업로드 성공" };
+  return file;
 }
 
-export async function updateFileById(id: number, name: string, folderId: number) {
-  const res = await fetch(`/api/files/${id}`, {
-    method: "PATCH",
-    credentials: "include",
-    body: JSON.stringify({ name, folderId: folderId ? folderId : 0 }),
-  });
+export async function postFile(
+  userId: string,
+  name: string,
+  type: string,
+  size: number,
+  folderId: string | null
+) {
+  const [file] = await db
+    .insert(files)
+    .values({
+      ownerId: userId,
+      name: name,
+      type: type,
+      size: size,
+      folderId: folderId,
+    })
+    .returning();
 
-  const { message } = await res.json();
-
-  if (!res.ok) {
-    throw new Error(message || "파일 수정 중 오류가 발생했습니다.");
+  if (!file) {
+    throw new Error("FILE NOT FOUND OR UNAUTHORIZED");
   }
 
-  return { message: message || "파일 수정 성공" };
+  return file;
 }
 
-export async function shareFileById(id: number) {
-  const res = await fetch(`/api/files/${id}/share`, {
-    method: "PATCH",
-    credentials: "include",
-  });
+export async function deleteFileById(userId: string, fileId: string) {
+  const [file] = await db
+    .delete(files)
+    .where(and(eq(files.id, fileId), eq(files.ownerId, userId)))
+    .returning();
 
-  const { message } = await res.json();
-
-  if (!res.ok) {
-    throw new Error(message || "파일 공유 상태 변경 중 오류가 발생했습니다.");
+  if (!file) {
+    throw new Error("FILE NOT FOUND OR UNAUTHORIZED");
   }
 
-  return { message: message || "파일 공유 상태 변경 성공" };
+  return file;
 }
 
-export async function deleteFileById(id: number) {
-  const res = await fetch(`/api/files/${id}`, {
-    method: "DELETE",
-    credentials: "include",
-  });
+export async function patchFileById(
+  userId: string,
+  fileId: string,
+  data: z.infer<typeof patchFileSchema>
+) {
+  const updateData = toDrizzleSet(data);
 
-  const { message } = await res.json();
+  const [file] = await db
+    .update(files)
+    .set({ ...updateData, updatedAt: new Date() })
+    .where(and(eq(files.id, fileId), eq(files.ownerId, userId)))
+    .returning();
 
-  if (!res.ok) {
-    throw new Error(message || "파일 삭제 중 오류가 발생했습니다.");
+  if (!file) {
+    throw new Error("FILE NOT FOUND OR UNAUTHORIZED");
   }
 
-  return { message: message || "파일 삭제 성공" };
+  return file;
 }
 
-export async function checkShareFile(code: string) {
-  const res = await fetch(`/api/download/check?code=${code}`, {
-    method: "GET",
-  });
+export async function getSharedFileById(fileId: string) {
+  const [file] = await db
+    .select()
+    .from(files)
+    .where(and(eq(files.id, fileId), eq(files.share, true)));
 
-  const { file, message } = await res.json();
-
-  if (!res.ok) {
-    throw new Error(message || "공유 파일 확인 중 오류가 발생했습니다.");
+  if (!file) {
+    throw new Error("FILE NOT FOUND OR UNAUTHORIZED");
   }
 
-  return { message: message || "공유 파일 확인 성공", file: file };
+  return file;
 }

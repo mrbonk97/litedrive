@@ -14,7 +14,7 @@ import { Button } from "../ui/button";
 import { PlusCircle } from "lucide-react";
 
 interface Props {
-  folderId: number;
+  folderId: string | null;
 }
 
 export function BottomNav({ folderId }: Props) {
@@ -22,12 +22,14 @@ export function BottomNav({ folderId }: Props) {
     <>
       <Drawer>
         <DrawerTrigger className="lg:hidden fixed bottom-8 right-8 z-50 text-rose-400">
-          <PlusCircle size={32} />
+          <PlusCircle size={32} className="bg-background shadow-2xl" />
         </DrawerTrigger>
         <DrawerContent>
           <DrawerHeader>
             <DrawerTitle className="sr-only">메뉴</DrawerTitle>
-            <DrawerDescription className="sr-only">폴더 & 파일 업로드 메뉴</DrawerDescription>
+            <DrawerDescription className="sr-only">
+              폴더 & 파일 업로드 메뉴
+            </DrawerDescription>
           </DrawerHeader>
           <DrawerFooter>
             <FolderCreateModal folderId={folderId} />

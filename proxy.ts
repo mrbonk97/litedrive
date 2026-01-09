@@ -1,30 +1,27 @@
-import { cookies } from "next/headers";
+import { isLoggedIn } from "./lib/session";
 import { NextResponse } from "next/server";
-import { getIronSession } from "iron-session";
 import type { NextRequest } from "next/server";
-import { SessionData, sessionOptions } from "@/lib/session";
+
+const PROTECTED_ROUTES = ["/folders", "/profile"];
 
 export async function proxy(req: NextRequest) {
-  const res = NextResponse.next();
+  const _isLoggedIn = await isLoggedIn();
 
-  const cookie = await cookies();
-  const session = await getIronSession<SessionData>(cookie, sessionOptions);
-
-  // 보호해야 하는 경로
-  const protectedPaths = ["/folders", "/profile"];
-  const isProtected = protectedPaths.some((path) => req.nextUrl.pathname.startsWith(path));
-
-  if (req.nextUrl.pathname == "/" && session.user) {
+  if (req.nextUrl.pathname == "/" && _isLoggedIn) {
     const loginUrl = new URL("/folders", req.url);
     return NextResponse.redirect(loginUrl);
   }
 
-  if (isProtected && !session.user) {
+  const isProtected = PROTECTED_ROUTES.some((path) =>
+    req.nextUrl.pathname.startsWith(path)
+  );
+
+  if (isProtected && !_isLoggedIn) {
     const loginUrl = new URL("/sign-in", req.url);
     return NextResponse.redirect(loginUrl);
   }
 
-  return res;
+  return NextResponse.next();
 }
 
 export const config = {

@@ -8,50 +8,31 @@ import {
   DialogTitle,
   DialogClose,
   DialogFooter,
+  DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/spinner";
 import { toast } from "sonner";
-import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { safeAwait } from "@/lib/safe-await";
-import { deleteUser } from "@/services/user-client";
+import Form from "next/form";
+import { SubmitButton } from "../submit-button";
+import { deleteUserAction } from "@/actions/user-action-client";
 
-const formSchema = z.object({
-  password: z.string().min(1, { error: "패스워드를 입력해주세요" }),
-});
-
-interface Props {
-  isOpen: boolean;
-  close: () => void;
-}
-
-export function UserDeleteModal({ isOpen, close }: Props) {
+export function UserDeleteModal() {
   const router = useRouter();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      password: "",
-    },
-  });
+  const onSubmit = async (formData: FormData) => {
+    const password = formData.get("password")?.toString();
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const [data, error] = await safeAwait(deleteUser(values.password));
+    if (!password) {
+      toast.error("패스워드를 입력해주세요");
+      return;
+    }
+
+    const [data, error] = await safeAwait(deleteUserAction(password));
 
     if (error) {
       toast.error(error.message);
-      form.setError("root", { message: error.message });
     }
 
     if (data) {
@@ -61,48 +42,51 @@ export function UserDeleteModal({ isOpen, close }: Props) {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={close}>
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button type="button" variant={"destructive"} className="shrink-0">
+          탈퇴
+        </Button>
+      </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>회원 탈퇴</DialogTitle>
-          <DialogDescription>탈퇴 후에 모든 정보는 즉시 삭제됩니다.</DialogDescription>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="mt-4 space-y-4">
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>비밀번호</FormLabel>
-                    <FormControl>
-                      <input
-                        type="password"
-                        placeholder="비밀번호를 입력해주세요"
-                        className="p-4 rounded border"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <p className="text-sm font-medium text-destructive text-center">
-                {form.formState.errors.root?.message}
-              </p>
-              <DialogFooter className="mt-16">
-                <Button variant={"secondary"} className="shrink-0" asChild>
-                  <DialogClose type="button">닫기</DialogClose>
-                </Button>
+          <DialogDescription>
+            탈퇴 후에 모든 정보는 즉시 삭제됩니다.
+          </DialogDescription>
+          <Form action={onSubmit}>
+            <label
+              htmlFor="password"
+              className="mt-2 hidden sm:block text-sm font-medium opacity-70"
+            >
+              파일 이름
+            </label>
+            <input
+              id="password"
+              type="password"
+              name="password"
+              placeholder="패스워드를 입력해주세요"
+              className="mt-2 p-4 w-full rounded border"
+              required
+              minLength={4}
+            />
+
+            <DialogFooter className="mt-4">
+              <DialogClose asChild>
                 <Button
-                  type="submit"
-                  variant={"destructive"}
-                  disabled={form.formState.isSubmitting}
-                  className="shrink w-full"
+                  type="button"
+                  variant={"secondary"}
+                  className="shrink-0"
                 >
-                  {form.formState.isSubmitting ? <Spinner /> : "회원 탈퇴"}
+                  닫기
                 </Button>
-              </DialogFooter>
-            </form>
+              </DialogClose>
+              <SubmitButton
+                text="회원 탈퇴"
+                className="shrink w-full"
+                varient="destructive"
+              />
+            </DialogFooter>
           </Form>
         </DialogHeader>
       </DialogContent>

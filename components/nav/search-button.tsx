@@ -31,25 +31,35 @@ export function SearchButton() {
   };
 
   return (
-    <Drawer direction="top" open={isOpen} onOpenChange={(open) => setIsOpen(open)}>
+    <Drawer
+      direction="top"
+      open={isOpen}
+      onOpenChange={(open) => setIsOpen(open)}
+    >
       <DrawerTrigger className="lg:hidden p-1 h-8 w-8 rounded-full">
         <Search className="text-rose-400" />
       </DrawerTrigger>
       <DrawerContent>
         <DrawerHeader>
           <DrawerTitle className="text-left">검색</DrawerTitle>
-          <DrawerDescription className="text-left">파일을 검색합니다.</DrawerDescription>
+          <DrawerDescription className="text-left">
+            파일을 검색합니다.
+          </DrawerDescription>
         </DrawerHeader>
-        <form onSubmit={onSubmit} className="mt-8 p-4 relative">
-          <button className="absolute top-1/2 left-8 -translate-y-1/2">
+        <form onSubmit={onSubmit} className="p-4 relative">
+          <button className="absolute top-1/2 left-6 -translate-y-1/2">
             <Search className="text-rose-400" />
           </button>
-          <input name="q" className="pl-12 p-4 w-full rounded border" placeholder="검색어를 입력해주세요" />
+          <input
+            name="q"
+            className="pl-12 p-4 w-full border-b"
+            placeholder="검색어를 입력해주세요"
+          />
         </form>
-        <DrawerFooter className="mt-8">
-          <Button variant={"secondary"} asChild>
-            <DrawerClose>닫기</DrawerClose>
-          </Button>
+        <DrawerFooter>
+          <DrawerClose asChild>
+            <Button variant={"secondary"}>닫기</Button>
+          </DrawerClose>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>

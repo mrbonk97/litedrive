@@ -35,7 +35,7 @@
 
 | 구분         | 사용 기술                                        |
 | ------------ | ------------------------------------------------ |
-| **Frontend** | Next.js 15 (App Router), TypeScript, TailwindCSS |
+| **Frontend** | Next.js 16 (App Router), TypeScript, TailwindCSS |
 | **Backend**  | Node.js, OracleDB, RESTful API                   |
 | **Auth**     | Iron Session 기반 쿠키 세션                      |
 | **Deploy**   | Docker, GitHub Actions                           |

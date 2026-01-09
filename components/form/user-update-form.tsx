@@ -1,149 +1,83 @@
 "use client";
 
+import Form from "next/form";
+import { SubmitButton } from "../submit-button";
 import { toast } from "sonner";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/spinner";
-import { UserDeleteModal } from "@/components/modal/user-delete-modal";
-import { updateUserPassword } from "@/services/user-client";
 import { safeAwait } from "@/lib/safe-await";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-
-const formSchema = z
-  .object({
-    oldPassword: z.string().trim().min(1, { error: "기존 패스워드를 입력해주세요" }),
-    newPassword: z
-      .string()
-      .trim()
-      .min(4, { error: "4 ~ 20자 사이로 입력해주세요" })
-      .max(20, { error: "4 ~ 20자 사이로 입력해주세요" }),
-    passwordConfirm: z.string().trim(),
-  })
-  .superRefine((data, ctx) => {
-    const pw = data.newPassword ?? "";
-    const pwc = data.passwordConfirm ?? "";
-
-    if (pw !== pwc) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["passwordConfirm"],
-        message: "비밀번호가 일치하지 않습니다",
-      });
-    }
-  });
+import { UserDeleteModal } from "../modal/user-delete-modal";
+import { updatePasswordAction } from "@/actions/user-action-client";
 
 export function UserUpdateForm() {
-  const router = useRouter();
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const onSubmit = async (formData: FormData) => {
+    const oldPassword = formData.get("oldPassword")?.toString();
+    const newPassword = formData.get("newPassword")?.toString();
+    const newPasswordConfirm = formData.get("newPasswordConfirm")?.toString();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      oldPassword: "",
-      newPassword: "",
-      passwordConfirm: "",
-    },
-  });
+    if (!oldPassword || !newPassword) {
+      toast.error("패스워드를 입력해주세요");
+      return;
+    }
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (newPassword !== newPasswordConfirm) {
+      toast.error("비밀번호가 일치하지 않습니다");
+      return;
+    }
+
     const [data, error] = await safeAwait(
-      updateUserPassword(values.oldPassword, values.newPassword)
+      updatePasswordAction(oldPassword, newPassword)
     );
+
     if (error) {
       toast.error(error.message);
-      form.setError("root", { message: error.message });
     }
 
     if (data) {
       toast.success(data.message);
-      setTimeout(() => router.push("/sign-out"), 150);
-      form.reset();
     }
   };
 
   return (
-    <>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="mt-2 space-y-4">
-          <FormField
-            control={form.control}
-            name="oldPassword"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="sr-only">기존 비밀번호</FormLabel>
-                <FormControl>
-                  <input
-                    {...field}
-                    type="password"
-                    placeholder="기존 비밀번호를 입력해주세요"
-                    className="p-4 rounded border"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="newPassword"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="sr-only">새로운 비밀번호</FormLabel>
-                <FormControl>
-                  <input
-                    {...field}
-                    type="password"
-                    placeholder="새로운 비밀번호를 입력해주세요"
-                    className="p-4 rounded border"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="passwordConfirm"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="sr-only">비밀번호 확인</FormLabel>
-                <FormControl>
-                  <input
-                    {...field}
-                    type="password"
-                    placeholder="비밀번호 확인"
-                    className="p-4 rounded border"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <div className="flex gap-2">
-            <Button type="button" variant={"destructive"} onClick={() => setIsModalOpen(true)}>
-              탈퇴
-            </Button>
-            <Button type="submit" disabled={form.formState.isSubmitting} className="shrink w-full">
-              {form.formState.isSubmitting ? <Spinner /> : "비밀번호 수정"}
-            </Button>
-          </div>
-          <p className="text-sm text-center text-destructive">
-            {form.formState.errors.root?.message}
-          </p>
-        </form>
-      </Form>
-      <UserDeleteModal isOpen={isModalOpen} close={() => setIsModalOpen(false)} />
-    </>
+    <Form action={onSubmit} className="mt-2 space-y-4">
+      <label htmlFor="oldPassword" className="sr-only">
+        기존 비밀번호
+      </label>
+      <input
+        type="password"
+        id="oldPassword"
+        name="oldPassword"
+        placeholder="기존 비밀번호를 입력해주세요"
+        className="p-4 w-full rounded border"
+        required
+        minLength={4}
+      />
+      <label htmlFor="newPassword" className="sr-only">
+        새로운 비밀번호
+      </label>
+      <input
+        type="password"
+        id="newPassword"
+        name="newPassword"
+        placeholder="새로운 비밀번호를 입력해주세요"
+        className="p-4 w-full rounded border"
+        required
+        minLength={4}
+      />
+      <label htmlFor="newPasswordConfirm" className="sr-only">
+        비밀번호 확인
+      </label>
+      <input
+        type="password"
+        id="newPasswordConfirm"
+        name="newPasswordConfirm"
+        placeholder="비밀번호 확인"
+        className="p-4 w-full rounded border"
+        required
+        minLength={4}
+      />
+      <div className="flex gap-2">
+        <UserDeleteModal />
+        <SubmitButton text="비밀번호 수정" className="w-full" />
+      </div>
+    </Form>
   );
 }

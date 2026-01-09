@@ -1,135 +1,110 @@
 "use client";
 
+import Form from "next/form";
 import Link from "next/link";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { useRouter } from "next/navigation";
-import { Button } from "../ui/button";
-import { Spinner } from "../spinner";
-import { toast } from "sonner";
-import { signIn, signUp } from "@/services/user-client";
 import { safeAwait } from "@/lib/safe-await";
-import { ForgotAccountModal } from "../modal/forget-account-modal";
-
-const formSchema = z
-  .object({
-    username: z
-      .string()
-      .min(4, { error: "4 ~ 20자 사이로 입력해주세요" })
-      .max(20, { error: "4 ~ 20자 사이로 입력해주세요" }),
-    password: z
-      .string()
-      .min(4, { error: "4 ~ 20자 사이로 입력해주세요" })
-      .max(20, { error: "4 ~ 20자 사이로 입력해주세요" }),
-    passwordConfirm: z.string(),
-  })
-  .refine((data) => data.password === data.passwordConfirm, {
-    message: "비밀번호가 일치하지 않습니다.",
-    path: ["passwordConfirm"],
-  });
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { SubmitButton } from "../submit-button";
+import { signUpAction } from "@/actions/auth-action-server";
 
 export function SignUpForm() {
   const router = useRouter();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      username: "",
-      password: "",
-      passwordConfirm: "",
-    },
-  });
+  const onSubmit = async (formData: FormData) => {
+    const username = formData.get("username")?.toString();
+    const password = formData.get("password")?.toString();
+    const passwordConfirm = formData.get("passwordConfirm")?.toString();
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    // 1. 회원가입
-    const [data1, error1] = await safeAwait(signUp(values.username, values.password));
-
-    if (error1) {
-      toast.error(error1.message);
-      form.setError("root", { message: error1.message });
+    if (!username || !password || !passwordConfirm) {
+      toast.error("아이디와 비밀번호를 입력해주세요");
       return;
     }
 
-    // 2. 로그인
-    const [data2, error2] = await safeAwait(signIn(values.username, values.password));
-
-    if (error2) {
-      toast.error(error2.message);
-      form.setError("root", { message: error2.message });
+    if (password !== passwordConfirm) {
+      toast.error("비밀번호가 일치하지 않습니다");
       return;
     }
 
-    if (data2) {
-      toast.success(data1.message);
-      setTimeout(() => router.push("/folders"), 150);
+    const [data, error] = await safeAwait(signUpAction(username, password));
+
+    if (error) {
+      toast.error(error.message);
+      return;
     }
+
+    toast.success(data.message);
+    setTimeout(() => {
+      router.push("/folders");
+    }, 150);
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="mt-8 sm:mt-16 mx-auto max-w-xl w-full">
-        <h1 className="hidden sm:block text-2xl font-bold opacity-80">회원가입</h1>
-        <FormField
-          control={form.control}
-          name="username"
-          render={({ field }) => (
-            <FormItem className="sm:mt-8">
-              <FormLabel>아이디</FormLabel>
-              <FormControl>
-                <input
-                  placeholder="username"
-                  className="p-4 border rounded"
-                  autoCapitalize="none"
-                  autoCorrect="off"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem className="mt-4">
-              <FormLabel>비밀번호</FormLabel>
-              <FormControl>
-                <input placeholder="* * * * * * * *" type="password" className="p-4 border rounded" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="passwordConfirm"
-          render={({ field }) => (
-            <FormItem className="mt-4">
-              <FormLabel>비밀번호 확인</FormLabel>
-              <FormControl>
-                <input placeholder="* * * * * * * *" type="password" className="p-4 border rounded" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit" disabled={form.formState.isSubmitting} className="mt-16 sm:mt-24 w-full">
-          {form.formState.isSubmitting ? <Spinner /> : "회원가입"}
-        </Button>
-        <p className="mt-4 text-xs text-center opacity-70">
-          이미 계정이 있으시다면{" "}
-          <Link href={"/sign-in"} className="hover:underline underline-offset-2">
-            로그인
-          </Link>
-        </p>
-        <p className="mt-2 text-xs text-center opacity-70">
-          계정을 잊어버리셨다면 <ForgotAccountModal />
-        </p>
-        <p className="mt-2 text-sm font-medium text-destructive text-center">{form.formState.errors.root?.message}</p>
-      </form>
+    <Form
+      action={onSubmit}
+      className="mt-8 sm:mt-16 mx-auto max-w-xl w-full space-y-2"
+    >
+      <h1 className="hidden sm:block text-2xl font-bold opacity-80">
+        회원가입
+      </h1>
+
+      <label
+        htmlFor="username"
+        className="mt-4 block text-sm font-medium opacity-70"
+      >
+        아이디
+      </label>
+      <input
+        id="username"
+        name="username"
+        placeholder="username"
+        className="p-4 border rounded w-full"
+        autoCapitalize="none"
+        autoCorrect="off"
+        required
+        minLength={4}
+      />
+
+      <label
+        htmlFor="password"
+        className="mt-2 block text-sm font-medium opacity-70"
+      >
+        패스워드
+      </label>
+      <input
+        id="password"
+        name="password"
+        type="password"
+        placeholder="* * * * * * * *"
+        className="p-4 border rounded w-full"
+        required
+        minLength={4}
+      />
+
+      <label
+        htmlFor="passwordConfirm"
+        className="mt-2 block text-sm font-medium opacity-70"
+      >
+        패스워드 확인
+      </label>
+      <input
+        id="passwordConfirm"
+        name="passwordConfirm"
+        type="password"
+        placeholder="* * * * * * * *"
+        className="p-4 border rounded w-full"
+        required
+        minLength={4}
+      />
+
+      <SubmitButton text="회원가입" className="mt-16 sm:mt-24 w-full" />
+
+      <p className="mt-4 text-xs text-center opacity-70">
+        이미 계정이 있으시다면{" "}
+        <Link href="/sign-in" className="hover:underline underline-offset-2">
+          로그인
+        </Link>
+      </p>
     </Form>
   );
 }
