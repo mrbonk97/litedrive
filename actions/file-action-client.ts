@@ -36,7 +36,7 @@ export async function uploadFileAction(file: File, folderId: string | null) {
   // STEP 2. presignedUrl로 파일 업로드
   const formData = new FormData();
 
-  formData.append("body", json1.file);
+  formData.append("body", file);
   const res2 = await fetch(json1.url, {
     method: "PUT",
     body: formData,
@@ -44,7 +44,7 @@ export async function uploadFileAction(file: File, folderId: string | null) {
   });
 
   // STEP 3. 업로드 완료
-  await updateFileAction(json1.id, {
+  await updateFileAction(json1.file.id, {
     uploadStatus: res2.ok ? "success" : "failed",
   });
 
