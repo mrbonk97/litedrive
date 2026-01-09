@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { Topnav2 } from "@/components/nav/top-nav-2";
+import { ProfileTopnav } from "@/components/nav/profile-top-nav";
 import { Footer } from "@/components/nav/footer";
 
 export const metadata: Metadata = {
@@ -13,7 +13,7 @@ interface Props {
 async function ProfileLayout({ children }: Props) {
   return (
     <>
-      <Topnav2 />
+      <ProfileTopnav />
       {children}
       <Footer />
     </>

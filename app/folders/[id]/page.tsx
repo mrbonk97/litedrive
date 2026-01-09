@@ -1,28 +1,28 @@
-import { Metadata } from "next";
-import { Topnav } from "@/components/nav/top-nav";
-import { Leftnav } from "@/components/nav/left-nav";
-import { safeAwait } from "@/lib/safe-await";
-import { getFolderById } from "@/services/folder-server";
-import { FolderProvider } from "@/context/folder-context";
-import { BreadCrumb } from "@/components/folder-bread-crumb";
-import { FolderTable } from "@/components/table/folder-table";
-import { FileType } from "@/app/types";
+import { getFolderById } from "@/actions/folder-action-server";
+import { FolderCrumb } from "@/components/folder-crumb";
 import { BottomNav } from "@/components/nav/bottom-nav";
+import { Leftnav } from "@/components/nav/left-nav";
+import { Topnav } from "@/components/nav/top-nav";
+import { FolderTable } from "@/components/table/folder-table";
+import { FolderProvider } from "@/context/folder-context";
+import { Squirrel } from "lucide-react";
+import { Metadata } from "next";
 
 interface Props {
-  params: Promise<{ id: string }>;
-  searchParams: Promise<{ q: string; filter: string }>;
+  params: Promise<{ id: string | null }>;
+  searchParams: Promise<{
+    q?: string;
+    filter?: string;
+  }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const _id = parseInt(id);
 
-  const [data] = await safeAwait(getFolderById(_id));
+  const { breadCrumb } = await getFolderById(id, undefined, undefined);
 
-  if (data) {
-    const len = data.breadCrumbs.length;
-    return { title: `${data.breadCrumbs[len - 1].NAME} - LiteDrive` };
+  if (breadCrumb.length > 0) {
+    return { title: `${breadCrumb[breadCrumb.length - 1].name} - LiteDrive` };
   }
 
   return { title: `폴더 - LiteDrive` };
@@ -31,41 +31,29 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 async function FoldersIdPage({ params, searchParams }: Props) {
   const { id } = await params;
   const { q, filter } = await searchParams;
-
-  const _id = parseInt(id);
-  if (isNaN(_id)) throw new Error("폴더 아이디는 숫자여야 합니다.");
-
-  const { files, breadCrumbs } = await getFolderById(_id, q, filter);
+  const { files, folders, breadCrumb } = await getFolderById(id, q, filter);
 
   return (
     <>
       <Topnav />
-      <Leftnav folderId={_id} />
+      <Leftnav folderId={id} filter={filter} />
       <main className="lg:pl-64 pt-14 min-h-full">
         <FolderProvider>
           <section className="p-4 border-b">
-            <BreadCrumb folders={[_HOME_BREAD_CRUMB, ...breadCrumbs]} />
+            <FolderCrumb breadCrumb={breadCrumb} />
           </section>
-          <FolderTable files={files} />
+          <FolderTable files={files} folders={folders} />
         </FolderProvider>
+        {files.length === 0 && folders.length === 0 && (
+          <div className="mt-4 p-4 text-rose-400">
+            <Squirrel className="mx-auto" size={48} />
+            <p className="mt-2 text-center">파일이 없습니다.</p>
+          </div>
+        )}
       </main>
-      <BottomNav folderId={_id} />
+      <BottomNav folderId={id} />
     </>
   );
 }
 
 export default FoldersIdPage;
-
-const _HOME_BREAD_CRUMB: FileType = {
-  ID: 0,
-  FOLDER_ID: 0,
-  PARENT_FOLDER_ID: 0,
-  NAME: "홈",
-  USERNAME: "",
-  SIZE_BYTES: 0,
-  CONTENT: "",
-  SHARE_CODE: null,
-  FILE_TYPE: "FOLDER",
-  UPDATED_AT: "",
-  CREATED_AT: "",
-};

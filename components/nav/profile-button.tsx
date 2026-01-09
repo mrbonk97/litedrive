@@ -8,25 +8,24 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { UserRound } from "lucide-react";
 import Link from "next/link";
-import { cookies } from "next/headers";
-import { getIronSession } from "iron-session";
-import { SessionData, sessionOptions } from "@/lib/session";
 import { SignOutButton } from "@/components/nav/sign-out-button";
+import { getSession } from "@/lib/session";
 
 export async function ProfileButton() {
-  const cookieStore = await cookies();
-  const session = await getIronSession<SessionData>(cookieStore, sessionOptions);
+  const session = await getSession();
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger>
+    <DropdownMenu modal={false}>
+      <DropdownMenuTrigger className="cursor-pointer">
         <UserRound className="p-1 h-8 w-8 rounded-full bg-rose-100 text-rose-400" />
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuLabel>{session.user?.username}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href={"/profile"}>프로필</Link>
+          <Link href={"/profile"} className="cursor-pointer">
+            프로필
+          </Link>
         </DropdownMenuItem>
         <SignOutButton />
       </DropdownMenuContent>

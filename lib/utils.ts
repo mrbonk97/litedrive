@@ -5,17 +5,14 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function convertByte(size: string | number) {
-  if (!size) return "-";
-  if (typeof size == "string") size = parseInt(size);
-
+export function formatSize(size: number) {
   if (size >= 1_000_000_000) return `${(size / 1_000_000_000).toFixed(2)}GB`;
   if (size >= 1_000_000) return `${(size / 1_000_000).toFixed(2)}MB`;
   if (size >= 10_000) return `${(size / 10_000).toFixed(2)}KB`;
   return `${size}B`;
 }
 
-export function getFileIcon(type: string) {
+export function getFileIcon(type: string | null) {
   switch (type) {
     case "apk":
       return "/static/icons/002-apk.svg";
@@ -54,7 +51,7 @@ export function getFileIcon(type: string) {
     case "ttf":
       return "/static/icons/025-ttf.svg";
     case "txt":
-      return "/static/icons/026-text.svg";
+      return "/static/icons/026-txt.svg";
     case "zip":
       return "/static/icons/032-zip.svg";
     default:

@@ -12,12 +12,12 @@ import {
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { FileType } from "@/app/types";
 import { toast } from "sonner";
 import { Shredder } from "lucide-react";
 import { useState } from "react";
 import { safeAwait } from "@/lib/safe-await";
-import { deleteFileById } from "@/services/file-service";
+import { FileType } from "@/types";
+import { deleteFileAction } from "@/actions/file-action-client";
 
 interface Props {
   file: FileType;
@@ -27,16 +27,14 @@ interface Props {
 
 export function FileDeleteModal({ file, isOpen, close }: Props) {
   const router = useRouter();
-  const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const onSubmit = async () => {
     setIsSubmitting(true);
-    const [data, error] = await safeAwait(deleteFileById(file.ID));
+    const [data, error] = await safeAwait(deleteFileAction(file.id));
 
     if (error) {
       toast.error(error.message);
-      setError(error.message);
     }
 
     if (data) {
@@ -49,19 +47,22 @@ export function FileDeleteModal({ file, isOpen, close }: Props) {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={() => close()}>
+    <Dialog open={isOpen} onOpenChange={close}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>파일 삭제</DialogTitle>
           <DialogDescription>파일을 삭제할 수 있습니다.</DialogDescription>
 
           <Shredder className="mt-16 mx-auto text-destructive" size={48} />
-          <p className="mt-4 text-sm text-center">{file.NAME}</p>
-          <p className="text-sm font-medium text-destructive text-center">{error}</p>
+          <p className="mt-2 text-sm text-center">{file.name}</p>
+
           <DialogFooter className="mt-16">
-            <Button variant={"secondary"} className="shrink-0" asChild>
-              <DialogClose>닫기</DialogClose>
-            </Button>
+            <DialogClose asChild>
+              <Button variant={"secondary"} className="shrink-0">
+                닫기
+              </Button>
+            </DialogClose>
+
             <Button
               variant={"destructive"}
               onClick={onSubmit}

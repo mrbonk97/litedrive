@@ -1,15 +1,12 @@
 import "./globals.css";
+import { Toaster } from "sonner";
 import type { Metadata } from "next";
-import { Noto_Sans_KR } from "next/font/google";
-import { Toaster } from "@/components/ui/sonner";
-
-const notoSans = Noto_Sans_KR({
-  subsets: ["latin"],
-});
+import { pretendard } from "@/lib/fonts";
 
 export const metadata: Metadata = {
   title: "LiteDrive",
-  description: "LiteDrive, 최소한의 보안으로 최대한의 속도. 파일만을 위한 가장 단순한 공유 플랫폼.",
+  description:
+    "LiteDrive, 최소한의 보안으로 최대한의 속도. 파일만을 위한 가장 단순한 공유 플랫폼.",
   applicationName: "LiteDrive",
   generator: "Next.js 15",
   keywords: [
@@ -27,7 +24,8 @@ export const metadata: Metadata = {
   publisher: "LiteDrive",
   openGraph: {
     title: "LiteDrive",
-    description: "LiteDrive, 최소한의 보안으로 최대한의 속도. 파일만을 위한 가장 단순한 공유 플랫폼.",
+    description:
+      "LiteDrive, 최소한의 보안으로 최대한의 속도. 파일만을 위한 가장 단순한 공유 플랫폼.",
     url: process.env.NEXT_PUBLIC_BASE_URL,
     siteName: "LiteDrive",
     images: [
@@ -45,12 +43,12 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "LiteDrive",
-    description: "LiteDrive, 최소한의 보안으로 최대한의 속도. 파일만을 위한 가장 단순한 공유 플랫폼.",
+    description:
+      "LiteDrive, 최소한의 보안으로 최대한의 속도. 파일만을 위한 가장 단순한 공유 플랫폼.",
     creator: "mrbonk97",
     images: [`${process.env.NEXT_PUBLIC_BASE_URL}/static/og-image.png`],
   },
 };
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -58,9 +56,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className={`${notoSans.className} min-h-[640px] antialiased`}>
+      <body className={`${pretendard.className} antialiased`}>
+        <Toaster />
         {children}
-        <Toaster position="top-center" />
       </body>
     </html>
   );

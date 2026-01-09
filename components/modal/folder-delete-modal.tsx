@@ -12,31 +12,29 @@ import {
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { FileType } from "@/app/types";
 import { toast } from "sonner";
 import { Shredder } from "lucide-react";
 import { useState } from "react";
-import { deleteFolderById } from "@/services/folder-client";
 import { safeAwait } from "@/lib/safe-await";
+import { FolderType } from "@/types";
+import { deleteFolderAction } from "@/actions/folder-action-client";
 
 interface Props {
-  folder: FileType;
+  folder: FolderType;
   isOpen: boolean;
   close: () => void;
 }
 
 export function FolderDeleteModal({ folder, isOpen, close }: Props) {
   const router = useRouter();
-  const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const onSubmit = async () => {
     setIsSubmitting(true);
-    const [data, error] = await safeAwait(deleteFolderById(folder.ID));
+    const [data, error] = await safeAwait(deleteFolderAction(folder.id));
 
     if (error) {
       toast.error(error.message);
-      setError(error.message);
     }
 
     if (data) {
@@ -56,8 +54,7 @@ export function FolderDeleteModal({ folder, isOpen, close }: Props) {
           <DialogDescription>폴더를 삭제할 수 있습니다.</DialogDescription>
 
           <Shredder className="mt-16 mx-auto text-destructive" size={48} />
-          <p className="mt-4 text-sm text-center">{folder.NAME}</p>
-          <p className="text-sm font-medium text-destructive text-center">{error}</p>
+          <p className="mt-4 text-sm text-center">{folder.name}</p>
 
           <DialogFooter className="mt-16">
             <Button variant={"secondary"} className="shrink-0" asChild>
