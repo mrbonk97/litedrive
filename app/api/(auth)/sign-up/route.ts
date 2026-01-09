@@ -1,4 +1,4 @@
-import { handleError } from "@/lib/error";
+import { handleError } from "@/lib/handle-error";
 import { createSession } from "@/lib/session";
 import { registerSchema } from "@/schemas/auth-schema";
 import { registerUser } from "@/services/user-service";
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     // 3. 세션 발급
     await createSession(user.id, user.username);
 
-    return NextResponse.json({ message: "회원가입 성공" }, { status: 201 });
+    return new NextResponse(null, { status: 201 });
   } catch (err) {
     return handleError(err);
   }

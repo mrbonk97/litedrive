@@ -1,4 +1,5 @@
-import { handleError } from "@/lib/error";
+import { ErrorCode } from "@/lib/handle-error";
+import { handleError } from "@/lib/handle-error";
 import { s3Client } from "@/lib/tebi";
 import { getSharedFileById } from "@/services/file-service";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
@@ -12,11 +13,11 @@ export async function GET(req: NextRequest) {
 
   try {
     if (typeof code !== "string") {
-      throw new Error("code 형식이 올바르지 않습니다.");
+      throw new Error(ErrorCode.INVALID_INPUT);
     }
 
     if (typeof type !== "string") {
-      throw new Error("type 형식이 올바르지 않습니다.");
+      throw new Error(ErrorCode.INVALID_INPUT);
     }
 
     if (type === "check") {

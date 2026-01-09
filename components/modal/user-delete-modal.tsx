@@ -36,7 +36,7 @@ export function UserDeleteModal() {
     }
 
     if (data) {
-      toast.success(data.message);
+      toast.success("회원탈퇴 완료");
       setTimeout(() => router.push("/bye"), 150);
     }
   };

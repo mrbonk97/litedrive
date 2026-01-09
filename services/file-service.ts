@@ -4,6 +4,7 @@ import { and, eq } from "drizzle-orm";
 import { files } from "@/db/schema";
 import { toDrizzleSet } from "./service-utils";
 import { patchFileSchema } from "@/schemas/file-schema";
+import { ErrorCode } from "@/lib/handle-error";
 
 export async function getFileById(userId: string, fileId: string) {
   const [file] = await db
@@ -12,7 +13,7 @@ export async function getFileById(userId: string, fileId: string) {
     .where(and(eq(files.ownerId, userId), eq(files.id, fileId)));
 
   if (!file) {
-    throw new Error("FILE NOT FOUND OR UNAUTHORIZED");
+    throw new Error(ErrorCode.UNAUTHORIZED);
   }
 
   return file;
@@ -37,7 +38,7 @@ export async function postFile(
     .returning();
 
   if (!file) {
-    throw new Error("FILE NOT FOUND OR UNAUTHORIZED");
+    throw new Error(ErrorCode.UNAUTHORIZED);
   }
 
   return file;
@@ -50,7 +51,7 @@ export async function deleteFileById(userId: string, fileId: string) {
     .returning();
 
   if (!file) {
-    throw new Error("FILE NOT FOUND OR UNAUTHORIZED");
+    throw new Error(ErrorCode.UNAUTHORIZED);
   }
 
   return file;
@@ -70,7 +71,7 @@ export async function patchFileById(
     .returning();
 
   if (!file) {
-    throw new Error("FILE NOT FOUND OR UNAUTHORIZED");
+    throw new Error(ErrorCode.UNAUTHORIZED);
   }
 
   return file;
@@ -83,7 +84,7 @@ export async function getSharedFileById(fileId: string) {
     .where(and(eq(files.id, fileId), eq(files.share, true)));
 
   if (!file) {
-    throw new Error("FILE NOT FOUND OR UNAUTHORIZED");
+    throw new Error(ErrorCode.UNAUTHORIZED);
   }
 
   return file;

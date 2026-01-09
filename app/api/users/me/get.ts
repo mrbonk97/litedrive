@@ -1,4 +1,4 @@
-import { handleError } from "@/lib/error";
+import { handleError } from "@/lib/handle-error";
 import { getSession } from "@/lib/session";
 import { getUserInfo } from "@/services/user-service";
 import { NextResponse } from "next/server";

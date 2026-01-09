@@ -37,7 +37,7 @@ export function ShareFileCard({ code }: Props) {
 
     if (data) {
       setFile(data);
-      toast.success("파일 조회 성공");
+      toast.success("파일 조회 완료");
     }
   };
 

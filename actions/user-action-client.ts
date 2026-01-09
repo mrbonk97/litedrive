@@ -5,11 +5,10 @@ export async function deleteUserAction(password: string) {
     credentials: "include",
   });
 
-  const { user, message } = await res.json();
-
-  if (!res.ok) throw new Error(message || "탈퇴 중 오류가 발생했습니다.");
-
-  return { user: user, message: message || "탈퇴 성공" };
+  if (!res.ok) {
+    const { message } = await res.json();
+    throw new Error(message || "회원탈퇴 중 오류가 발생했습니다.");
+  }
 }
 
 export async function updatePasswordAction(
@@ -22,9 +21,8 @@ export async function updatePasswordAction(
     body: JSON.stringify({ oldPassword, newPassword }),
   });
 
-  const { message } = await res.json();
-  if (!res.ok)
+  if (!res.ok) {
+    const { message } = await res.json();
     throw new Error(message || "패스워드 수정 중 오류가 발생했습니다.");
-
-  return { message: message || "패스워드 수정 성공" };
+  }
 }

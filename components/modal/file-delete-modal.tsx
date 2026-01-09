@@ -38,7 +38,7 @@ export function FileDeleteModal({ file, isOpen, close }: Props) {
     }
 
     if (data) {
-      toast.success(data.message);
+      toast.success("삭제 완료");
       router.refresh();
       setTimeout(() => close(), 150);
     }

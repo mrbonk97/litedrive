@@ -1,4 +1,4 @@
-import { handleError } from "@/lib/error";
+import { handleError } from "@/lib/handle-error";
 import { getSession } from "@/lib/session";
 import { deleteUserSchema } from "@/schemas/auth-schema";
 import { deleteUser } from "@/services/user-service";
@@ -14,7 +14,7 @@ export default async function DELETE(req: NextRequest) {
 
     await deleteUser(session.user!.id, password);
 
-    return NextResponse.json({ message: "회원탈퇴 성공" }, { status: 200 });
+    return new NextResponse(null, { status: 204 });
   } catch (err) {
     return handleError(err);
   }

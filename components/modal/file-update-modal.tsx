@@ -42,7 +42,7 @@ export function FileUpdateModal({ file, isOpen, close }: Props) {
     }
 
     if (data) {
-      toast.success(data.message);
+      toast.success("수정 완료");
       router.refresh();
       setTimeout(() => close(), 150);
     }

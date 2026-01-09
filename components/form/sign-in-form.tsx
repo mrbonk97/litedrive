@@ -7,7 +7,7 @@ import { safeAwait } from "@/lib/safe-await";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { SubmitButton } from "../submit-button";
-import { signInAction } from "@/actions/auth-action-server";
+import { signInAction } from "@/actions/auth-action-client";
 
 export function SignInForm() {
   const router = useRouter();
@@ -21,14 +21,14 @@ export function SignInForm() {
       return;
     }
 
-    const [data, error] = await safeAwait(signInAction(username, password));
+    const [, error] = await safeAwait(signInAction(username, password));
 
     if (error) {
       toast.error(error.message);
       return;
     }
 
-    toast.success(data.message);
+    toast.success("로그인 성공");
     setTimeout(() => {
       router.push("/folders");
     }, 150);

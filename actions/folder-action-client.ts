@@ -8,13 +8,10 @@ export async function createFolderAction(
     body: JSON.stringify({ name, parentFolderId }),
   });
 
-  const { message } = await res.json();
-
   if (!res.ok) {
+    const { message } = await res.json();
     throw new Error(message || "폴더 생성 중 오류가 발생했습니다.");
   }
-
-  return { message: message || "폴더 생성 성공" };
 }
 
 type UpdateFolderPayload = {
@@ -32,13 +29,10 @@ export async function updateFolderAction(
     body: JSON.stringify(payload),
   });
 
-  const { message } = await res.json();
-
   if (!res.ok) {
+    const { message } = await res.json();
     throw new Error(message || "폴더 수정 중 오류가 발생했습니다.");
   }
-
-  return { message: message || "폴더 수정 성공" };
 }
 
 export async function deleteFolderAction(id: string) {
@@ -47,11 +41,8 @@ export async function deleteFolderAction(id: string) {
     credentials: "include",
   });
 
-  const { message } = await res.json();
-
   if (!res.ok) {
+    const { message } = await res.json();
     throw new Error(message || "폴더 삭제 중 오류가 발생했습니다.");
   }
-
-  return { message: message || "폴더 삭제 성공" };
 }

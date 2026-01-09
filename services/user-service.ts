@@ -2,6 +2,7 @@ import { db } from "@/db/db";
 import { and, eq, sql } from "drizzle-orm";
 import { files, users } from "@/db/schema";
 import { compareHash, encryptPassword } from "@/lib/encrypt";
+import { ErrorCode } from "@/lib/handle-error";
 
 export async function registerUser(username: string, password: string) {
   const hashed = await encryptPassword(password);
@@ -21,13 +22,13 @@ export async function loginUser(username: string, password: string) {
     .where(and(eq(users.username, username)));
 
   if (!user) {
-    throw new Error("USER NOT FOUND");
+    throw new Error(ErrorCode.USER_NOT_FOUND);
   }
 
   const isCorrect = await compareHash(password, user.password);
 
   if (!isCorrect) {
-    throw new Error("PASSWORD INCORRECT");
+    throw new Error(ErrorCode.INVALID_PASSWORD);
   }
 
   return user;
@@ -43,12 +44,12 @@ export async function deleteUser(userId: string, password: string) {
     .where(eq(users.id, userId));
 
   if (!user) {
-    throw new Error("USER NOT FOUND");
+    throw new Error(ErrorCode.USER_NOT_FOUND);
   }
 
   const isCorrect = await compareHash(password, user.password);
   if (!isCorrect) {
-    throw new Error("PASSWORD INCORRECT");
+    throw new Error(ErrorCode.INVALID_PASSWORD);
   }
 
   const [deletedUser] = await db
@@ -81,7 +82,7 @@ export async function getUserInfo(userId: string) {
     .groupBy(users.id);
 
   if (!user) {
-    throw new Error("USER_NOT_FOUND");
+    throw new Error(ErrorCode.USER_NOT_FOUND);
   }
 
   return user;
@@ -101,12 +102,12 @@ export async function updateUserInfo(
     .where(eq(users.id, userId));
 
   if (!user) {
-    throw new Error("USER NOT FOUND");
+    throw new Error(ErrorCode.USER_NOT_FOUND);
   }
 
   const isCorrect = await compareHash(oldPassword, user.password);
   if (!isCorrect) {
-    throw new Error("PASSWORD INCORRECT");
+    throw new Error(ErrorCode.INVALID_PASSWORD);
   }
 
   const newHashed = await encryptPassword(newPassword);

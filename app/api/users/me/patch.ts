@@ -1,4 +1,4 @@
-import { handleError } from "@/lib/error";
+import { handleError } from "@/lib/handle-error";
 import { getSession } from "@/lib/session";
 import { updateUserSchema } from "@/schemas/auth-schema";
 import { updateUserInfo } from "@/services/user-service";
@@ -14,10 +14,7 @@ export default async function PATCH(req: NextRequest) {
 
     await updateUserInfo(session.user!.id, oldPassword, newPassword);
 
-    return NextResponse.json(
-      { message: "회원정보 수정 성공" },
-      { status: 200 }
-    );
+    return new NextResponse(null, { status: 204 });
   } catch (err) {
     return handleError(err);
   }

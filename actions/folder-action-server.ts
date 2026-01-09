@@ -19,12 +19,12 @@ export async function getFolderById(
     headers: { Cookie: cookieStore.toString() },
   });
 
-  const { message, folders, files, breadCrumb } = await res.json();
-
   if (!res.ok) {
-    throw new Error(message || "폴더를 가져오는 중 오류가 발생했습니다.");
+    const { message } = await res.json();
+    throw new Error(message || "폴더 조회 중 오류가 발생했습니다.");
   }
 
+  const { folders, files, breadCrumb } = await res.json();
   return { folders, files, breadCrumb } as {
     folders: FolderType[];
     files: FileType[];

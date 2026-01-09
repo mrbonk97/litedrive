@@ -52,7 +52,7 @@ export function FolderRow({ folder }: Props) {
         updateFolderAction(dragRow.id!, { parentFolderId: folder.id })
       );
       if (data) {
-        toast.success(data.message);
+        toast.success("수정 완료");
         setTimeout(() => router.refresh(), 150);
       }
       if (error) {
@@ -66,7 +66,7 @@ export function FolderRow({ folder }: Props) {
         updateFileAction(dragRow.id!, { folderId: folder.id })
       );
       if (data) {
-        toast.success(data.message);
+        toast.success("수정 완료");
         setTimeout(() => router.refresh(), 150);
       }
       if (error) {

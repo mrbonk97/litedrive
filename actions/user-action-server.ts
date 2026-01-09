@@ -8,11 +8,11 @@ export async function getUserInfoAction() {
     headers: { Cookie: cookieStore.toString() },
   });
 
-  const { user, message } = await res.json();
-  if (!res.ok)
-    throw new Error(
-      message || "사용자 정보를 가져오는 중 오류가 발생했습니다."
-    );
+  if (!res.ok) {
+    const { message } = await res.json();
+    throw new Error(message || "사용자 조회 중 오류가 발생했습니다.");
+  }
 
-  return { user: user, message: message || "사용자 정보 조회 성공" };
+  const { user } = await res.json();
+  return { user: user };
 }

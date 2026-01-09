@@ -1,6 +1,6 @@
 import { getSession } from "@/lib/session";
 import { NextRequest, NextResponse } from "next/server";
-import { handleError } from "@/lib/error";
+import { handleError } from "@/lib/handle-error";
 import { getFileById } from "@/services/file-service";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";

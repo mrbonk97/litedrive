@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { safeAwait } from "@/lib/safe-await";
 import { DropdownMenuItem } from "../ui/dropdown-menu";
-import { signOutAction } from "@/actions/auth-action-client";
+import { signOutAction } from "@/actions/auth-action-server";
 
 export function SignOutButton() {
   const router = useRouter();
@@ -16,7 +16,7 @@ export function SignOutButton() {
     }
 
     if (data) {
-      toast.success(data.message);
+      toast.success("로그아웃 완료");
       setTimeout(() => router.push("/sign-out"), 150);
     }
   };

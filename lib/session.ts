@@ -1,5 +1,6 @@
-import { getIronSession, SessionOptions } from "iron-session";
 import { cookies } from "next/headers";
+import { getIronSession, SessionOptions } from "iron-session";
+import { ErrorCode } from "./handle-error";
 
 interface SessionData {
   user?: {
@@ -29,7 +30,7 @@ export async function destroySession() {
 
   // 세션이 있는지 검증
   const userId = session.user?.id;
-  if (!userId) throw new Error("로그아웃 할 사용자가 없습니다.");
+  if (!userId) throw new Error(ErrorCode.USER_NOT_FOUND);
 
   session.destroy();
 }
@@ -41,7 +42,7 @@ export async function getSession() {
   // 세션이 있는지 검증
   const userId = session.user?.id;
   if (!userId) {
-    throw new Error("SESSION NOT FOUND");
+    throw new Error(ErrorCode.SESSION_NOT_FOUND);
   }
 
   return session;

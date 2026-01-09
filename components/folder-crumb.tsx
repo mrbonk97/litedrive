@@ -36,7 +36,7 @@ export function FolderCrumb({ breadCrumb }: Props) {
         updateFolderAction(dragRow.id!, { parentFolderId: folderId })
       );
       if (data) {
-        toast.success(data.message);
+        toast.success("수정 완료");
         setTimeout(() => router.refresh(), 150);
       }
       if (error) {
@@ -50,7 +50,7 @@ export function FolderCrumb({ breadCrumb }: Props) {
         updateFileAction(dragRow.id!, { folderId: folderId })
       );
       if (data) {
-        toast.success(data.message);
+        toast.success("수정 완료");
         setTimeout(() => router.refresh(), 150);
       }
       if (error) {

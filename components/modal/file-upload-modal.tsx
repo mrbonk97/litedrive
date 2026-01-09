@@ -70,9 +70,9 @@ export function FileUploadModal({ folderId }: Props) {
       if (successCount === 0) {
         toast.error("업로드 실패");
       } else if (failCount > 0) {
-        toast.error(`업로드 완료: ${successCount}개 성공, ${failCount}개 실패`);
+        toast.error(`업로드 완료: ${successCount}개 완료, ${failCount}개 실패`);
       } else {
-        toast.success(`${successCount}개 파일 업로드 성공`);
+        toast.success(`${successCount}개 파일 업로드 완료`);
       }
 
       setTimeout(() => ref.current?.click(), 150);

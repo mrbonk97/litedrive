@@ -6,7 +6,7 @@ import { safeAwait } from "@/lib/safe-await";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { SubmitButton } from "../submit-button";
-import { signUpAction } from "@/actions/auth-action-server";
+import { signUpAction } from "@/actions/auth-action-client";
 
 export function SignUpForm() {
   const router = useRouter();
@@ -26,14 +26,14 @@ export function SignUpForm() {
       return;
     }
 
-    const [data, error] = await safeAwait(signUpAction(username, password));
+    const [, error] = await safeAwait(signUpAction(username, password));
 
     if (error) {
       toast.error(error.message);
       return;
     }
 
-    toast.success(data.message);
+    toast.success("회원가입 성공");
     setTimeout(() => {
       router.push("/folders");
     }, 150);

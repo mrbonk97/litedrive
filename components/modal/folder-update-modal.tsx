@@ -45,7 +45,7 @@ export function FolderUpdateModal({ folder, isOpen, close }: Props) {
     }
 
     if (data) {
-      toast.success("폴더 생성 성공");
+      toast.success("수정 완료");
       router.refresh();
       setTimeout(() => close(), 150);
     }

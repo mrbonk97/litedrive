@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { destroySession } from "@/lib/session";
-import { handleError } from "@/lib/error";
+import { handleError } from "@/lib/handle-error";
 
 export async function GET() {
   try {
     await destroySession();
 
-    return NextResponse.json({ message: "로그아웃 성공" });
+    return new NextResponse(null, { status: 204 });
   } catch (err) {
     return handleError(err);
   }

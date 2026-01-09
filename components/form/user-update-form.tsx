@@ -32,7 +32,7 @@ export function UserUpdateForm() {
     }
 
     if (data) {
-      toast.success(data.message);
+      toast.success("수정 완료");
     }
   };
 

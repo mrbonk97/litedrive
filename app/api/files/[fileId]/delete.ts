@@ -1,6 +1,6 @@
 import { getSession } from "@/lib/session";
 import { NextRequest, NextResponse } from "next/server";
-import { handleError } from "@/lib/error";
+import { handleError } from "@/lib/handle-error";
 import { deleteFileById } from "@/services/file-service";
 
 interface Props {

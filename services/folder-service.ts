@@ -4,6 +4,7 @@ import { and, eq, isNull, like, sql } from "drizzle-orm";
 import { files, folders, users } from "@/db/schema";
 import { toDrizzleSet } from "./service-utils";
 import { patchFolderSchema } from "@/schemas/folder-schema";
+import { ErrorCode } from "@/lib/handle-error";
 
 export async function getRootFolder(
   userId: string,
@@ -209,10 +210,6 @@ export async function postFolder(
     .values({ ownerId: userId, name: name, parentFolderId: parentFolderId })
     .returning();
 
-  if (!folder) {
-    throw new Error("FOLDER CREATE FAILED");
-  }
-
   return folder;
 }
 
@@ -223,7 +220,7 @@ export async function deleteFolderById(userId: string, folderId: string) {
     .returning();
 
   if (!folder) {
-    throw new Error("FILE NOT FOUND OR UNAUTHORIZED");
+    throw new Error(ErrorCode.UNAUTHORIZED);
   }
 
   return folder;
@@ -243,7 +240,7 @@ export async function patchFolderById(
     .returning();
 
   if (!folder) {
-    throw new Error("FOLDER NOT FOUND OR UNAUTHORIZED");
+    throw new Error(ErrorCode.UNAUTHORIZED);
   }
 
   return folder;

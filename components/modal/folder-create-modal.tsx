@@ -44,7 +44,7 @@ export function FolderCreateModal({ folderId }: Props) {
     }
 
     if (data) {
-      toast.success("폴더 생성 성공");
+      toast.success("폴더 생성 완료");
       router.refresh();
       setTimeout(() => ref.current?.click(), 150);
     }

@@ -1,4 +1,4 @@
-import { handleError } from "@/lib/error";
+import { handleError } from "@/lib/handle-error";
 import { getSession } from "@/lib/session";
 import { patchFileById } from "@/services/file-service";
 import { NextRequest, NextResponse } from "next/server";
