@@ -17,40 +17,19 @@ import { toast } from "sonner";
 import { formatSize } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { safeAwait } from "@/lib/safe-await";
-import { ChangeEvent, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { uploadFileAction } from "@/actions/file-action-client";
+import { useFiles } from "@/hooks/use-file";
 
 interface Props {
   folderId: string | null;
 }
 
-const MAX_TOTAL_SIZE = 10 * 1024 * 1024;
-
 export function FileUploadModal({ folderId }: Props) {
   const router = useRouter();
   const ref = useRef<HTMLButtonElement>(null);
-  const [files, setFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) return;
-
-    const _files = Array.from(e.target.files);
-
-    // 파일 중 하나라도 10MB 초과하면 에러
-    const isSizeOver = _files.some((file) => file.size > MAX_TOTAL_SIZE);
-
-    if (isSizeOver) {
-      toast.error("파일의 용량이 10MB를 초과했습니다.");
-      return;
-    }
-
-    setFiles(_files);
-  };
-
-  const handleDelete = (name: string) => {
-    setFiles((cur) => cur.filter((file) => file.name !== name));
-  };
+  const { files, handleAdd, handleDrop, removeFile, reset } = useFiles();
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
@@ -84,7 +63,7 @@ export function FileUploadModal({ folderId }: Props) {
   return (
     <Dialog
       onOpenChange={(next) => {
-        if (next) setFiles([]);
+        if (next) reset();
       }}
     >
       <DialogTrigger asChild>
@@ -99,6 +78,8 @@ export function FileUploadModal({ folderId }: Props) {
         </DialogHeader>
         <label
           htmlFor="files"
+          onDrop={handleDrop}
+          onDragOver={(e) => e.preventDefault()}
           className="h-40 flex flex-col items-center justify-center gap-2 text-rose-400 rounded-lg border-dashed border-rose-400 border-2 hover:opacity-80 hover:bg-secondary cursor-pointer"
         >
           <CloudUpload size={36} />
@@ -107,9 +88,9 @@ export function FileUploadModal({ folderId }: Props) {
             최대용량: 10MB (각 파일)
           </p>
         </label>
-        <input id="files" type="file" multiple hidden onChange={handleChange} />
+        <input id="files" type="file" multiple hidden onChange={handleAdd} />
 
-        <ul className="max-h-80 space-y-2 overflow-y-auto">
+        <ul className="max-h-48 space-y-2 overflow-y-auto">
           {files.map((file) => (
             <li
               key={file.name}
@@ -118,7 +99,7 @@ export function FileUploadModal({ folderId }: Props) {
               <div className="col-span-8 truncate">{file.name}</div>
               <div className="col-span-3 ml-auto">{formatSize(file.size)}</div>
               <button
-                onClick={() => handleDelete(file.name)}
+                onClick={() => removeFile(file)}
                 className="col-span-1 ml-auto cursor-pointer hover:opacity-80 duration-150"
               >
                 <X size={16} opacity={0.5} />
