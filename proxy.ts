@@ -1,4 +1,4 @@
-import { isLoggedIn } from "./lib/session";
+import { isLoggedIn } from "@/lib/session";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 

@@ -12,11 +12,11 @@ import {
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import { Shredder } from "lucide-react";
+import { toast } from "sonner";
 import { useState } from "react";
-import { safeAwait } from "@/lib/safe-await";
 import { FileType } from "@/types";
+import { safeAwait } from "@/lib/safe-await";
 import { deleteFileAction } from "@/actions/file-action-client";
 
 interface Props {
@@ -31,19 +31,17 @@ export function FileDeleteModal({ file, isOpen, close }: Props) {
 
   const onSubmit = async () => {
     setIsSubmitting(true);
-    const [data, error] = await safeAwait(deleteFileAction(file.id));
+    const [, error] = await safeAwait(deleteFileAction(file.id));
 
     if (error) {
       toast.error(error.message);
+      return;
     }
 
-    if (data) {
-      toast.success("삭제 완료");
-      router.refresh();
-      setTimeout(() => close(), 150);
-    }
-
+    toast.success("삭제 완료");
+    router.refresh();
     setIsSubmitting(false);
+    setTimeout(() => close(), 150);
   };
 
   return (

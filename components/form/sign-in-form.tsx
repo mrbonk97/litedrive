@@ -2,12 +2,12 @@
 
 import Form from "next/form";
 import Link from "next/link";
-import { ForgotAccountModal } from "../modal/forget-account-modal";
-import { safeAwait } from "@/lib/safe-await";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { SubmitButton } from "../submit-button";
+import { safeAwait } from "@/lib/safe-await";
+import { SubmitButton } from "@/components/submit-button";
 import { signInAction } from "@/actions/auth-action-client";
+import { ForgotAccountModal } from "@/components/modal/forget-account-modal";
 
 export function SignInForm() {
   const router = useRouter();
@@ -29,9 +29,7 @@ export function SignInForm() {
     }
 
     toast.success("로그인 성공");
-    setTimeout(() => {
-      router.push("/folders");
-    }, 150);
+    setTimeout(() => router.push("/folders"), 150);
   };
 
   return (

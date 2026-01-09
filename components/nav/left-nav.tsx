@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { House, UsersRound } from "lucide-react";
+import { Logo } from "@/components/nav/logo";
 import { FileUploadModal } from "@/components/modal/file-upload-modal";
 import { FolderCreateModal } from "@/components/modal/folder-create-modal";
-import { Logo } from "@/components/nav/logo";
 
 interface Props {
   folderId: string | null;

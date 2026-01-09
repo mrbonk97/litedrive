@@ -9,12 +9,11 @@ import {
   DialogClose,
   DialogFooter,
 } from "@/components/ui/dialog";
-
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { safeAwait } from "@/lib/safe-await";
-import { SubmitButton } from "../submit-button";
+import { SubmitButton } from "@/components/submit-button";
 import { FolderType } from "@/types";
 import Form from "next/form";
 import { updateFolderAction } from "@/actions/folder-action-client";
@@ -36,19 +35,16 @@ export function FolderUpdateModal({ folder, isOpen, close }: Props) {
       return;
     }
 
-    const [data, error] = await safeAwait(
-      updateFolderAction(folder.id, { name })
-    );
+    const [, error] = await safeAwait(updateFolderAction(folder.id, { name }));
 
     if (error) {
       toast.error(error.message);
+      return;
     }
 
-    if (data) {
-      toast.success("수정 완료");
-      router.refresh();
-      setTimeout(() => close(), 150);
-    }
+    toast.success("수정 완료");
+    router.refresh();
+    setTimeout(() => close(), 150);
   };
 
   return (

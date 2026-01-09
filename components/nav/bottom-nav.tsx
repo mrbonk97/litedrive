@@ -1,5 +1,3 @@
-import { FileUploadModal } from "../modal/file-upload-modal";
-import { FolderCreateModal } from "../modal/folder-create-modal";
 import {
   Drawer,
   DrawerClose,
@@ -10,8 +8,10 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
+import { FileUploadModal } from "@/components/modal/file-upload-modal";
+import { FolderCreateModal } from "@/components/modal/folder-create-modal";
 
 interface Props {
   folderId: string | null;

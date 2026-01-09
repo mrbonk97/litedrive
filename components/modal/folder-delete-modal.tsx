@@ -31,19 +31,17 @@ export function FolderDeleteModal({ folder, isOpen, close }: Props) {
 
   const onSubmit = async () => {
     setIsSubmitting(true);
-    const [data, error] = await safeAwait(deleteFolderAction(folder.id));
+    const [, error] = await safeAwait(deleteFolderAction(folder.id));
 
     if (error) {
       toast.error(error.message);
+      return;
     }
 
-    if (data) {
-      toast.success("삭제 완료");
-      router.refresh();
-      setTimeout(() => close(), 150);
-    }
-
+    toast.success("삭제 완료");
+    router.refresh();
     setIsSubmitting(false);
+    setTimeout(() => close(), 150);
   };
 
   return (
