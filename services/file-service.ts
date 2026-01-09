@@ -2,7 +2,7 @@ import { z } from "zod";
 import { db } from "@/db/db";
 import { and, eq } from "drizzle-orm";
 import { files } from "@/db/schema";
-import { toDrizzleSet } from "./service-utils";
+import { toDrizzleSet } from "@/services/service-utils";
 import { patchFileSchema } from "@/schemas/file-schema";
 import { ErrorCode } from "@/lib/handle-error";
 

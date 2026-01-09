@@ -14,7 +14,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { safeAwait } from "@/lib/safe-await";
 import { updateFileAction } from "@/actions/file-action-client";
-import { SubmitButton } from "../submit-button";
+import { SubmitButton } from "@/components/submit-button";
 import { FileType } from "@/types";
 import Form from "next/form";
 
@@ -35,17 +35,16 @@ export function FileUpdateModal({ file, isOpen, close }: Props) {
       return;
     }
 
-    const [data, error] = await safeAwait(updateFileAction(file.id, { name }));
+    const [, error] = await safeAwait(updateFileAction(file.id, { name }));
 
     if (error) {
       toast.error(error.message);
+      return;
     }
 
-    if (data) {
-      toast.success("수정 완료");
-      router.refresh();
-      setTimeout(() => close(), 150);
-    }
+    toast.success("수정 완료");
+    router.refresh();
+    setTimeout(() => close(), 150);
   };
 
   return (

@@ -10,7 +10,7 @@ import { useState } from "react";
 import { FileType } from "@/types";
 import { formatSize, getFileIcon } from "@/lib/utils";
 import Image from "next/image";
-import { SubmitButton } from "./submit-button";
+import { SubmitButton } from "@/components/submit-button";
 
 interface Props {
   code: string | undefined;
@@ -50,6 +50,7 @@ export function ShareFileCard({ code }: Props) {
 
     if (error) {
       toast.error(error.message);
+      return;
     }
 
     if (data) {

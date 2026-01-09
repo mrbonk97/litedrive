@@ -1,11 +1,8 @@
 "use client";
 
-import { FileType } from "@/types";
-import Image from "next/image";
-import { FileShareModal } from "../modal/file-share-modal";
-import { FileDeleteModal } from "../modal/file-delete-modal";
-import { FileUpdateModal } from "../modal/file-update-modal";
 import { useState } from "react";
+import Image from "next/image";
+import { FileType } from "@/types";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,12 +11,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Ellipsis } from "lucide-react";
-import { formatSize, getFileIcon } from "@/lib/utils";
-import { useFolder } from "@/context/folder-context";
-import { safeAwait } from "@/lib/safe-await";
-import { downloadFileAction } from "@/actions/file-action-client";
 import { toast } from "sonner";
+import { Ellipsis } from "lucide-react";
+import { safeAwait } from "@/lib/safe-await";
+import { useFolder } from "@/context/folder-context";
+import { formatSize, getFileIcon } from "@/lib/utils";
+import { downloadFileAction } from "@/actions/file-action-client";
+import { FileShareModal } from "@/components/modal/file-share-modal";
+import { FileDeleteModal } from "@/components/modal/file-delete-modal";
+import { FileUpdateModal } from "@/components/modal/file-update-modal";
 
 interface Props {
   file: FileType;
@@ -42,13 +42,14 @@ export function FileRow({ file }: Props) {
   const downloadFile = async () => {
     const [data, error] = await safeAwait(downloadFileAction(file.id));
 
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+
     if (data) {
       window.open(data, "_self");
       toast.success("파일 다운로드가 시작되었습니다.");
-    }
-
-    if (error) {
-      toast.error(error.message);
     }
   };
 

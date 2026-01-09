@@ -1,6 +1,5 @@
 "use client";
 
-import { ChangeEvent, useRef, useState } from "react";
 import {
   Dialog,
   DialogClose,
@@ -12,13 +11,14 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Aperture, CloudUpload, X } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/spinner";
 import { toast } from "sonner";
-import { safeAwait } from "@/lib/safe-await";
-import { uploadFileAction } from "@/actions/file-action-client";
 import { formatSize } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import { safeAwait } from "@/lib/safe-await";
+import { ChangeEvent, useRef, useState } from "react";
+import { uploadFileAction } from "@/actions/file-action-client";
 
 interface Props {
   folderId: string | null;
@@ -56,27 +56,29 @@ export function FileUploadModal({ folderId }: Props) {
     setIsSubmitting(true);
     let successCount = 0;
     let failCount = 0;
+
     for (const file of files) {
-      const [data, error] = await safeAwait(uploadFileAction(file, folderId));
-      if (data) {
-        successCount++;
-      }
+      const [, error] = await safeAwait(uploadFileAction(file, folderId));
+
       if (error) {
         failCount++;
+        continue;
       }
 
-      setIsSubmitting(false);
-      router.refresh();
-      if (successCount === 0) {
-        toast.error("업로드 실패");
-      } else if (failCount > 0) {
-        toast.error(`업로드 완료: ${successCount}개 완료, ${failCount}개 실패`);
-      } else {
-        toast.success(`${successCount}개 파일 업로드 완료`);
-      }
-
-      setTimeout(() => ref.current?.click(), 150);
+      successCount++;
     }
+
+    setIsSubmitting(false);
+    router.refresh();
+    if (successCount === 0) {
+      toast.error("업로드 실패");
+    } else if (failCount > 0) {
+      toast.error(`업로드 완료: ${successCount}개 완료, ${failCount}개 실패`);
+    } else {
+      toast.success(`${successCount}개 파일 업로드 완료`);
+    }
+
+    setTimeout(() => ref.current?.click(), 150);
   };
 
   return (

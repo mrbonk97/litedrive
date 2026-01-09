@@ -32,19 +32,17 @@ export function FileShareModal({ file, isOpen, close }: Props) {
   const onSubmit = async () => {
     setIsSubmitting(true);
 
-    const [data, error] = await safeAwait(
+    const [, error] = await safeAwait(
       updateFileAction(file.id, { share: !file.share })
     );
 
     if (error) {
       toast.error(error.message);
+      return;
     }
 
-    if (data) {
-      toast.success("수정 완료");
-      router.refresh();
-    }
-
+    toast.success("수정 완료");
+    router.refresh();
     setIsSubmitting(false);
   };
 

@@ -1,7 +1,7 @@
 import Form from "next/form";
-import { ProfileButton } from "./profile-button";
 import { Search } from "lucide-react";
-import { Logo } from "./logo";
+import { Logo } from "@/components/nav/logo";
+import { ProfileButton } from "@/components/nav/profile-button";
 
 export function ProfileTopnav() {
   return (

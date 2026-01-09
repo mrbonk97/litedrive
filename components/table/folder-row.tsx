@@ -13,9 +13,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Ellipsis } from "lucide-react";
 import { useState } from "react";
-import { FolderDeleteModal } from "../modal/folder-delete-modal";
-import { FolderUpdateModal } from "../modal/folder-update-modal";
 import { useFolder } from "@/context/folder-context";
+import { FolderDeleteModal } from "@/components/modal/folder-delete-modal";
+import { FolderUpdateModal } from "@/components/modal/folder-update-modal";
 import { updateFolderAction } from "@/actions/folder-action-client";
 import { updateFileAction } from "@/actions/file-action-client";
 import { toast } from "sonner";
@@ -48,30 +48,32 @@ export function FolderRow({ folder }: Props) {
 
     // folder → folder
     if (dragRow.type === "folder") {
-      const [data, error] = await safeAwait(
+      const [, error] = await safeAwait(
         updateFolderAction(dragRow.id!, { parentFolderId: folder.id })
       );
-      if (data) {
-        toast.success("수정 완료");
-        setTimeout(() => router.refresh(), 150);
-      }
+
       if (error) {
         toast.error(error.message);
+        return;
       }
+
+      toast.success("수정 완료");
+      setTimeout(() => router.refresh(), 150);
     }
 
     // file → folder
     if (dragRow.type === "file") {
-      const [data, error] = await safeAwait(
+      const [, error] = await safeAwait(
         updateFileAction(dragRow.id!, { folderId: folder.id })
       );
-      if (data) {
-        toast.success("수정 완료");
-        setTimeout(() => router.refresh(), 150);
-      }
+
       if (error) {
         toast.error(error.message);
+        return;
       }
+
+      toast.success("수정 완료");
+      setTimeout(() => router.refresh(), 150);
     }
   };
 

@@ -2,10 +2,10 @@
 
 import Form from "next/form";
 import Link from "next/link";
-import { safeAwait } from "@/lib/safe-await";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { SubmitButton } from "../submit-button";
+import { safeAwait } from "@/lib/safe-await";
+import { SubmitButton } from "@/components/submit-button";
 import { signUpAction } from "@/actions/auth-action-client";
 
 export function SignUpForm() {
@@ -34,9 +34,7 @@ export function SignUpForm() {
     }
 
     toast.success("회원가입 성공");
-    setTimeout(() => {
-      router.push("/folders");
-    }, 150);
+    setTimeout(() => router.push("/folders"), 150);
   };
 
   return (

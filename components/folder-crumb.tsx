@@ -32,30 +32,32 @@ export function FolderCrumb({ breadCrumb }: Props) {
 
     // folder → folder
     if (dragRow.type === "folder") {
-      const [data, error] = await safeAwait(
+      const [, error] = await safeAwait(
         updateFolderAction(dragRow.id!, { parentFolderId: folderId })
       );
-      if (data) {
-        toast.success("수정 완료");
-        setTimeout(() => router.refresh(), 150);
-      }
+
       if (error) {
         toast.error(error.message);
+        return;
       }
+
+      toast.success("수정 완료");
+      setTimeout(() => router.refresh(), 150);
     }
 
     // file → folder
     if (dragRow.type === "file") {
-      const [data, error] = await safeAwait(
+      const [, error] = await safeAwait(
         updateFileAction(dragRow.id!, { folderId: folderId })
       );
-      if (data) {
-        toast.success("수정 완료");
-        setTimeout(() => router.refresh(), 150);
-      }
+
       if (error) {
         toast.error(error.message);
+        return;
       }
+
+      toast.success("수정 완료");
+      setTimeout(() => router.refresh(), 150);
     }
   };
 

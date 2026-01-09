@@ -1,11 +1,11 @@
 "use client";
 
 import Form from "next/form";
-import { SubmitButton } from "../submit-button";
 import { toast } from "sonner";
 import { safeAwait } from "@/lib/safe-await";
-import { UserDeleteModal } from "../modal/user-delete-modal";
+import { SubmitButton } from "@/components/submit-button";
 import { updatePasswordAction } from "@/actions/user-action-client";
+import { UserDeleteModal } from "@/components/modal/user-delete-modal";
 
 export function UserUpdateForm() {
   const onSubmit = async (formData: FormData) => {
@@ -23,17 +23,16 @@ export function UserUpdateForm() {
       return;
     }
 
-    const [data, error] = await safeAwait(
+    const [, error] = await safeAwait(
       updatePasswordAction(oldPassword, newPassword)
     );
 
     if (error) {
       toast.error(error.message);
+      return;
     }
 
-    if (data) {
-      toast.success("수정 완료");
-    }
+    toast.success("수정 완료");
   };
 
   return (

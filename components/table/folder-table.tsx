@@ -1,6 +1,6 @@
 import { FileType, FolderType } from "@/types";
-import { FolderRow } from "./folder-row";
-import { FileRow } from "./file-row";
+import { FolderRow } from "@/components/table/folder-row";
+import { FileRow } from "@/components/table/file-row";
 
 interface Props {
   files: FileType[];

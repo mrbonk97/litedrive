@@ -12,13 +12,13 @@ import {
 } from "@/components/ui/dialog";
 
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import { SubmitButton } from "@/components/submit-button";
 import { FolderPlus } from "lucide-react";
+import { toast } from "sonner";
 import { useRef } from "react";
+import Form from "next/form";
 import { useRouter } from "next/navigation";
 import { safeAwait } from "@/lib/safe-await";
-import Form from "next/form";
-import { SubmitButton } from "../submit-button";
 import { createFolderAction } from "@/actions/folder-action-client";
 
 interface Props {
@@ -37,17 +37,18 @@ export function FolderCreateModal({ folderId }: Props) {
       return;
     }
 
-    const [data, error] = await safeAwait(createFolderAction(name, folderId));
+    const [, error] = await safeAwait(createFolderAction(name, folderId));
 
     if (error) {
       toast.error(error.message);
+      return;
     }
 
-    if (data) {
-      toast.success("폴더 생성 완료");
-      router.refresh();
-      setTimeout(() => ref.current?.click(), 150);
-    }
+    toast.success("폴더 생성 완료");
+    router.refresh();
+    setTimeout(() => {
+      ref.current?.click();
+    }, 150);
   };
 
   return (

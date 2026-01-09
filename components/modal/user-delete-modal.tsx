@@ -10,12 +10,12 @@ import {
   DialogFooter,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import Form from "next/form";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { safeAwait } from "@/lib/safe-await";
-import Form from "next/form";
-import { SubmitButton } from "../submit-button";
+import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/submit-button";
 import { deleteUserAction } from "@/actions/user-action-client";
 
 export function UserDeleteModal() {
@@ -29,16 +29,15 @@ export function UserDeleteModal() {
       return;
     }
 
-    const [data, error] = await safeAwait(deleteUserAction(password));
+    const [, error] = await safeAwait(deleteUserAction(password));
 
     if (error) {
       toast.error(error.message);
+      return;
     }
 
-    if (data) {
-      toast.success("회원탈퇴 완료");
-      setTimeout(() => router.push("/bye"), 150);
-    }
+    toast.success("회원탈퇴 완료");
+    setTimeout(() => router.push("/bye"), 150);
   };
 
   return (

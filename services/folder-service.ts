@@ -1,10 +1,10 @@
 import { z } from "zod";
 import { db } from "@/db/db";
+import { ErrorCode } from "@/lib/handle-error";
 import { and, eq, isNull, like, sql } from "drizzle-orm";
 import { files, folders, users } from "@/db/schema";
-import { toDrizzleSet } from "./service-utils";
+import { toDrizzleSet } from "@/services/service-utils";
 import { patchFolderSchema } from "@/schemas/folder-schema";
-import { ErrorCode } from "@/lib/handle-error";
 
 export async function getRootFolder(
   userId: string,
