@@ -1,45 +1,46 @@
 "use client";
 
-import Form from "next/form";
 import Link from "next/link";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { safeAwait } from "@/lib/safe-await";
-import { SubmitButton } from "@/components/submit-button";
-import { signUpAction } from "@/actions/auth-action-client";
+import { SignUpPayload } from "@/client/api/auth.type";
+import { useMutation } from "@tanstack/react-query";
+import { SignUp } from "@/client/api/auth.api";
+import { FormEvent } from "react";
+import { Spinner } from "@/components/spinner";
+import { Button } from "@/components/ui/button";
 
 export function SignUpForm() {
   const router = useRouter();
+  const { isPending, mutate } = useMutation({
+    mutationFn: (payLoad: SignUpPayload) => SignUp(payLoad),
+    onSuccess: () => {
+      toast.success("회원가입 성공");
+      router.push("/folders");
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+  });
 
-  const onSubmit = async (formData: FormData) => {
-    const username = formData.get("username")?.toString();
-    const password = formData.get("password")?.toString();
-    const passwordConfirm = formData.get("passwordConfirm")?.toString();
-
-    if (!username || !password || !passwordConfirm) {
-      toast.error("아이디와 비밀번호를 입력해주세요");
-      return;
-    }
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const username = formData.get("username")!.toString();
+    const password = formData.get("password")!.toString();
+    const passwordConfirm = formData.get("passwordConfirm")!.toString();
 
     if (password !== passwordConfirm) {
       toast.error("비밀번호가 일치하지 않습니다");
       return;
     }
 
-    const [, error] = await safeAwait(signUpAction(username, password));
-
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-
-    toast.success("회원가입 성공");
-    setTimeout(() => router.push("/folders"), 150);
+    mutate({ username, password });
   };
 
   return (
-    <Form
-      action={onSubmit}
+    <form
+      onSubmit={handleSubmit}
       className="mt-8 sm:mt-16 mx-auto max-w-xl w-full space-y-2"
     >
       <h1 className="hidden sm:block text-2xl font-bold opacity-80">
@@ -95,14 +96,15 @@ export function SignUpForm() {
         minLength={4}
       />
 
-      <SubmitButton text="회원가입" className="mt-16 sm:mt-24 w-full" />
-
+      <Button className="mt-16 sm:mt-24 w-full">
+        {isPending ? <Spinner /> : "회원가입"}
+      </Button>
       <p className="mt-4 text-xs text-center opacity-70">
         이미 계정이 있으시다면{" "}
         <Link href="/sign-in" className="hover:underline underline-offset-2">
           로그인
         </Link>
       </p>
-    </Form>
+    </form>
   );
 }

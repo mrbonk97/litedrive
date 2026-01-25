@@ -9,57 +9,14 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import React from "react";
+import { useDnd } from "@/hooks/use-dnd";
 import { BreadCrumbType } from "@/types";
-import { useFolder } from "@/context/folder-context";
-import { safeAwait } from "@/lib/safe-await";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { updateFileAction } from "@/actions/file-action-client";
-import { updateFolderAction } from "@/actions/folder-action-client";
 
 interface Props {
   breadCrumb: BreadCrumbType[];
 }
 export function FolderCrumb({ breadCrumb }: Props) {
-  const router = useRouter();
-  const context = useFolder();
-
-  const handleDrop = async (folderId: string | null) => {
-    const dragRow = context.state.drag;
-    if (!dragRow) return;
-    if (dragRow.id === folderId) return;
-    if (dragRow.type === "folder" && dragRow.parentId === folderId) return;
-
-    // folder → folder
-    if (dragRow.type === "folder") {
-      const [, error] = await safeAwait(
-        updateFolderAction(dragRow.id!, { parentFolderId: folderId })
-      );
-
-      if (error) {
-        toast.error(error.message);
-        return;
-      }
-
-      toast.success("수정 완료");
-      setTimeout(() => router.refresh(), 150);
-    }
-
-    // file → folder
-    if (dragRow.type === "file") {
-      const [, error] = await safeAwait(
-        updateFileAction(dragRow.id!, { folderId: folderId })
-      );
-
-      if (error) {
-        toast.error(error.message);
-        return;
-      }
-
-      toast.success("수정 완료");
-      setTimeout(() => router.refresh(), 150);
-    }
-  };
+  const dnd = useDnd();
 
   return (
     <Breadcrumb>
@@ -67,20 +24,17 @@ export function FolderCrumb({ breadCrumb }: Props) {
         <BreadcrumbItem
           onDragOver={(e) => {
             e.preventDefault();
-            context.dispatch({
+            dnd.dispatch({
               type: "DRAG_OVER",
               row: { id: null, parentId: null, type: "folder" },
             });
           }}
-          onDragEnd={() => {
-            context.dispatch({ type: "DRAG_END" });
-          }}
           onDrop={(e) => {
             e.preventDefault();
-            handleDrop(null);
+            dnd.drop();
           }}
           className={
-            context.state.target?.id === null
+            dnd.state.target?.id === null
               ? "relative z-50 outline-2 outline-dashed outline-rose-400"
               : ""
           }
@@ -101,20 +55,17 @@ export function FolderCrumb({ breadCrumb }: Props) {
               <BreadcrumbItem
                 onDragOver={(e) => {
                   e.preventDefault();
-                  context.dispatch({
+                  dnd.dispatch({
                     type: "DRAG_OVER",
-                    row: { id: folder.id, parentId: null, type: "folder" },
+                    row: { id: null, parentId: null, type: "folder" },
                   });
-                }}
-                onDragEnd={() => {
-                  context.dispatch({ type: "DRAG_END" });
                 }}
                 onDrop={(e) => {
                   e.preventDefault();
-                  handleDrop(folder.id);
+                  dnd.drop();
                 }}
                 className={
-                  context.state.target?.id === folder.id
+                  dnd.state.target?.id === folder.id
                     ? "relative z-50 outline-2 outline-dashed outline-rose-400"
                     : ""
                 }

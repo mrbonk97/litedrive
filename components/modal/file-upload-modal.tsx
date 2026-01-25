@@ -15,72 +15,111 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/spinner";
 import { toast } from "sonner";
 import { formatSize } from "@/lib/utils";
-import { useRouter } from "next/navigation";
-import { safeAwait } from "@/lib/safe-await";
 import { useRef, useState } from "react";
-import { uploadFileAction } from "@/actions/file-action-client";
 import { useFiles } from "@/hooks/use-file";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { UploadFilePayload } from "@/client/api/file.type";
+import { updateFile, uploadFile } from "@/client/api/file.api";
+import { useFolder } from "@/hooks/use-folder";
+import { uploadtoS3 } from "@/client/api/s3.api";
 
-interface Props {
-  folderId: string | null;
-}
+export function FileUploadModal() {
+  const { folderId } = useFolder();
+  const queryClient = useQueryClient();
 
-export function FileUploadModal({ folderId }: Props) {
-  const router = useRouter();
-  const ref = useRef<HTMLButtonElement>(null);
+  const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
   const { files, handleAdd, handleDrop, removeFile, reset } = useFiles();
+
+  const result = useRef({ success: 0, fail: 0 });
+
+  const uploadMutation = useMutation({
+    mutationFn: async ({ folderId, file }: UploadFilePayload) => {
+      // 1. 서버에 파일 생성 + presigned URL
+      const { file: createdFile, url } = await uploadFile({ folderId, file });
+
+      try {
+        // 2. S3 업로드
+        await uploadtoS3(url, file);
+
+        // 3. 성공 처리
+        await updateFile({
+          id: createdFile.id,
+          uploadStatus: "success",
+        });
+      } catch (err) {
+        // 3. 실패 처리
+        await updateFile({
+          id: createdFile.id,
+          uploadStatus: "failed",
+        });
+
+        // 실패를 상위로 전파
+        throw err;
+      }
+    },
+  });
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    let successCount = 0;
-    let failCount = 0;
+    result.current = { success: 0, fail: 0 };
 
-    for (const file of files) {
-      const [, error] = await safeAwait(uploadFileAction(file, folderId));
+    const results = await Promise.allSettled(
+      files.map((file) => uploadMutation.mutateAsync({ folderId, file })),
+    );
 
-      if (error) {
-        failCount++;
-        continue;
+    results.forEach((res) => {
+      if (res.status === "fulfilled") {
+        result.current.success++;
+      } else {
+        result.current.fail++;
       }
-
-      successCount++;
-    }
+    });
 
     setIsSubmitting(false);
-    router.refresh();
-    if (successCount === 0) {
+
+    const { success, fail } = result.current;
+
+    if (success === 0) {
       toast.error("업로드 실패");
-    } else if (failCount > 0) {
-      toast.error(`업로드 완료: ${successCount}개 완료, ${failCount}개 실패`);
+    } else if (fail > 0) {
+      toast.error(`업로드 완료: ${success}개 성공, ${fail}개 실패`);
     } else {
-      toast.success(`${successCount}개 파일 업로드 완료`);
+      toast.success(`${success}개 파일 업로드 완료`);
     }
 
-    setTimeout(() => ref.current?.click(), 150);
+    queryClient.invalidateQueries({ queryKey: ["folder", folderId] });
+    reset();
+    setIsOpen(false);
   };
 
   return (
     <Dialog
+      open={isOpen}
       onOpenChange={(next) => {
         if (next) reset();
+        setIsOpen(next);
       }}
     >
       <DialogTrigger asChild>
         <Button className="w-full">
-          <span className="text-base">파일 업로드</span> <Aperture />
+          <span className="text-base">파일 업로드</span>
+          <Aperture />
         </Button>
       </DialogTrigger>
+
       <DialogContent>
         <DialogHeader>
           <DialogTitle>파일 업로드</DialogTitle>
           <DialogDescription>현재 경로에 파일을 추가합니다.</DialogDescription>
         </DialogHeader>
+
         <label
           htmlFor="files"
           onDrop={handleDrop}
           onDragOver={(e) => e.preventDefault()}
-          className="h-40 flex flex-col items-center justify-center gap-2 text-rose-400 rounded-lg border-dashed border-rose-400 border-2 hover:opacity-80 hover:bg-secondary cursor-pointer"
+          className="h-32 flex flex-col items-center justify-center gap-2 text-rose-400 rounded border-dashed border-rose-400 border-2 hover:opacity-80 hover:bg-secondary cursor-pointer"
         >
           <CloudUpload size={36} />
           <p className="text-sm font-medium">클릭해서 파일을 추가하세요</p>
@@ -90,29 +129,34 @@ export function FileUploadModal({ folderId }: Props) {
         </label>
         <input id="files" type="file" multiple hidden onChange={handleAdd} />
 
-        <ul className="max-h-48 space-y-2 overflow-y-auto">
-          {files.map((file) => (
-            <li
-              key={file.name}
-              className="p-2 text-sm grid grid-cols-12 items-center bg-secondary rounded"
-            >
-              <div className="col-span-8 truncate">{file.name}</div>
-              <div className="col-span-3 ml-auto">{formatSize(file.size)}</div>
-              <button
-                onClick={() => removeFile(file)}
-                className="col-span-1 ml-auto cursor-pointer hover:opacity-80 duration-150"
+        {files.length > 0 && (
+          <ul className="max-h-48 space-y-2 overflow-y-auto">
+            {files.map((file) => (
+              <li
+                key={`${file.name}-${file.lastModified}`}
+                className="p-2 text-sm grid grid-cols-12 items-center bg-secondary rounded"
               >
-                <X size={16} opacity={0.5} />
-              </button>
-            </li>
-          ))}
-        </ul>
+                <div className="col-span-8 truncate">{file.name}</div>
+                <div className="col-span-3 ml-auto">
+                  {formatSize(file.size)}
+                </div>
+                <button
+                  onClick={() => removeFile(file)}
+                  disabled={isSubmitting}
+                  className="col-span-1 ml-auto hover:opacity-80 duration-150"
+                >
+                  <X size={16} opacity={0.5} />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+
         <DialogFooter>
           <DialogClose asChild>
             <Button
-              ref={ref}
               disabled={isSubmitting}
-              variant={"secondary"}
+              variant="secondary"
               className="shrink-0"
             >
               닫기
@@ -121,7 +165,7 @@ export function FileUploadModal({ folderId }: Props) {
           <Button
             type="button"
             onClick={handleSubmit}
-            disabled={isSubmitting}
+            disabled={isSubmitting || files.length === 0}
             className="shrink w-full"
           >
             {isSubmitting ? <Spinner /> : "업로드"}

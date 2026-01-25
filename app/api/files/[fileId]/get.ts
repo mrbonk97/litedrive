@@ -1,10 +1,10 @@
 import { getSession } from "@/lib/session";
 import { NextRequest, NextResponse } from "next/server";
 import { handleError } from "@/lib/handle-error";
-import { getFileById } from "@/services/file-service";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { s3Client } from "@/lib/tebi";
+import { getFileById } from "@/server/services/file.service";
 
 interface Props {
   params: Promise<{ fileId: string }>;
@@ -21,7 +21,7 @@ export default async function GET(_: NextRequest, { params }: Props) {
       Bucket: "litedrive",
       Key: file.id,
       ResponseContentDisposition: `attachment; filename="${encodeURIComponent(
-        file.name
+        file.name,
       )}"`,
     });
 

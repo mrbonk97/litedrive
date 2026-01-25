@@ -1,40 +1,40 @@
 "use client";
 
-import Form from "next/form";
 import Link from "next/link";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { safeAwait } from "@/lib/safe-await";
-import { SubmitButton } from "@/components/submit-button";
-import { signInAction } from "@/actions/auth-action-client";
-import { ForgotAccountModal } from "@/components/modal/forget-account-modal";
+import { useMutation } from "@tanstack/react-query";
+import { SignIn } from "@/client/api/auth.api";
+import { SignInPayload } from "@/client/api/auth.type";
+import { FormEvent } from "react";
+import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/spinner";
 
 export function SignInForm() {
   const router = useRouter();
 
-  const onSubmit = async (formData: FormData) => {
-    const username = formData.get("username")?.toString();
-    const password = formData.get("password")?.toString();
+  const { isPending, mutate } = useMutation({
+    mutationFn: (payLoad: SignInPayload) => SignIn(payLoad),
+    onSuccess: () => {
+      toast.success("로그인 성공");
+      router.push("/folders");
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+  });
 
-    if (!username || !password) {
-      toast.error("아이디와 비밀번호를 입력해주세요");
-      return;
-    }
-
-    const [, error] = await safeAwait(signInAction(username, password));
-
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-
-    toast.success("로그인 성공");
-    setTimeout(() => router.push("/folders"), 150);
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const username = formData.get("username")!.toString();
+    const password = formData.get("password")!.toString();
+    mutate({ username, password });
   };
 
   return (
-    <Form
-      action={onSubmit}
+    <form
+      onSubmit={handleSubmit}
       className="mt-8 sm:mt-16 mx-auto max-w-xl w-full space-y-2"
     >
       <h1 className="hidden sm:block text-2xl font-bold opacity-80">로그인</h1>
@@ -72,7 +72,9 @@ export function SignInForm() {
         minLength={4}
       />
 
-      <SubmitButton text="로그인" className="mt-16 sm:mt-24 w-full" />
+      <Button className="mt-16 sm:mt-24 w-full">
+        {isPending ? <Spinner /> : "로그인"}
+      </Button>
 
       <p className="mt-4 text-xs text-center opacity-70">
         아직 계정이 없으시다면{" "}
@@ -81,9 +83,7 @@ export function SignInForm() {
         </Link>
       </p>
 
-      <p className="mt-2 text-xs text-center opacity-70">
-        계정을 잊어버리셨다면 <ForgotAccountModal />
-      </p>
-    </Form>
+      <p className="mt-2 text-xs text-center opacity-70"></p>
+    </form>
   );
 }

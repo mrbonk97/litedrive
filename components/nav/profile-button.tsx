@@ -20,7 +20,7 @@ export async function ProfileButton() {
         <UserRound className="p-1 h-8 w-8 rounded-full bg-rose-100 text-rose-400" />
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        <DropdownMenuLabel>{session.user?.username}</DropdownMenuLabel>
+        <DropdownMenuLabel>{session.user!.username}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link href={"/profile"} className="cursor-pointer">

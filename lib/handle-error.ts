@@ -12,21 +12,16 @@ export enum ErrorCode {
 }
 
 export function handleError(err: unknown) {
-  console.log(err);
+  console.error(err);
 
-  // 1️. Zod 검증 에러
+  // Zod 에러 처리
   if (err instanceof ZodError) {
     const tree = z.treeifyError(err);
 
     return NextResponse.json(
       { message: "입력값이 올바르지 않습니다", errors: tree },
-      { status: 400 }
+      { status: 400 },
     );
   }
-
-  if (err instanceof Error) {
-    return NextResponse.json({ message: err.message }, { status: 400 });
-  }
-
   return NextResponse.json({ message: "서버 오류" }, { status: 500 });
 }

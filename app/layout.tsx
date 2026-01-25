@@ -2,6 +2,8 @@ import "./globals.css";
 import { Toaster } from "sonner";
 import type { Metadata } from "next";
 import { pretendard } from "@/lib/fonts";
+import { TanstackProvider } from "@/context/tanstack-provider";
+import { ThemeProvider } from "@/context/theme-context";
 
 export const metadata: Metadata = {
   title: "LiteDrive",
@@ -49,17 +51,26 @@ export const metadata: Metadata = {
     images: [`${process.env.NEXT_PUBLIC_BASE_URL}/static/og-image.png`],
   },
 };
-export default function RootLayout({
-  children,
-}: Readonly<{
+
+interface Props {
   children: React.ReactNode;
-}>) {
+}
+function RootLayout({ children }: Props) {
   return (
-    <html lang="ko">
+    <html lang="ko" suppressHydrationWarning>
       <body className={`${pretendard.className} antialiased`}>
-        <Toaster />
-        {children}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <Toaster position="top-center" />
+          <TanstackProvider>{children}</TanstackProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
 }
+
+export default RootLayout;

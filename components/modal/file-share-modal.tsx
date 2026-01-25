@@ -11,13 +11,13 @@ import {
 } from "@/components/ui/dialog";
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Copy, Radio } from "lucide-react";
-import { useState } from "react";
-import { safeAwait } from "@/lib/safe-await";
-import { updateFileAction } from "@/actions/file-action-client";
 import { FileType } from "@/types";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { UpdateFilePayload } from "@/client/api/file.type";
+import { updateFile } from "@/client/api/file.api";
+import { useFolder } from "@/hooks/use-folder";
 
 interface Props {
   file: FileType;
@@ -26,31 +26,31 @@ interface Props {
 }
 
 export function FileShareModal({ file, isOpen, close }: Props) {
-  const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { folderId } = useFolder();
+  const queryClient = useQueryClient();
+  const { isPending, mutate } = useMutation({
+    mutationFn: (payLoad: UpdateFilePayload) => updateFile(payLoad),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["folder", folderId] });
+      toast.success("파일 공유상태 변경됨");
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+  });
 
-  const onSubmit = async () => {
-    setIsSubmitting(true);
-
-    const [, error] = await safeAwait(
-      updateFileAction(file.id, { share: !file.share })
-    );
-
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-
-    toast.success("수정 완료");
-    router.refresh();
-    setIsSubmitting(false);
+  const handleClick = () => {
+    mutate({
+      id: file.id,
+      share: !file.share,
+    });
   };
 
   const handleCopy = async () => {
     if (!file.share) return;
 
     await navigator.clipboard.writeText(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/download?code=${file.id}`
+      `${process.env.NEXT_PUBLIC_BASE_URL}/download?code=${file.id}`,
     );
 
     toast.success("클립보드에 복사하였습니다.");
@@ -62,51 +62,45 @@ export function FileShareModal({ file, isOpen, close }: Props) {
         <DialogHeader>
           <DialogTitle>파일 공유</DialogTitle>
           <DialogDescription>파일을 공유할 수 있습니다.</DialogDescription>
-
-          {file.share ? (
-            <div className="mt-16">
-              <div className="hidden sm:block mt-2 text-sm font-medium opacity-70">
-                다운로드 링크
-              </div>
-              <div className="mt-2.5 p-2 flex items-center justify-center rounded border">
-                <p className="text-xs font-bold opacity-80 w-full">
-                  {`${process.env.NEXT_PUBLIC_BASE_URL}/download?code=${file.id}`}
-                </p>
-                <Button
-                  variant={"secondary"}
-                  className="p-2"
-                  onClick={handleCopy}
-                >
-                  <Copy />
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <>
-              <Radio className="mt-16 mx-auto text-rose-400" size={48} />
-              <p className="mt-2 text-sm text-center">{file.name}</p>
-            </>
-          )}
-
-          <DialogFooter className="mt-16">
-            <Button variant={"secondary"} className="shrink-0" asChild>
-              <DialogClose>닫기</DialogClose>
-            </Button>
-            <Button
-              onClick={onSubmit}
-              disabled={isSubmitting}
-              className="shrink w-full"
-            >
-              {isSubmitting ? (
-                <Spinner />
-              ) : file.share ? (
-                "공유 중지"
-              ) : (
-                "공유 하기"
-              )}
-            </Button>
-          </DialogFooter>
         </DialogHeader>
+
+        {file.share ? (
+          <div>
+            <div className="hidden sm:block text-sm font-medium opacity-70">
+              다운로드 링크
+            </div>
+            <div className="mt-2 p-2 flex items-center justify-center rounded border">
+              <p className="text-xs font-bold opacity-80 w-full">
+                {`${process.env.NEXT_PUBLIC_BASE_URL}/download?code=${file.id}`}
+              </p>
+              <Button
+                variant={"secondary"}
+                className="p-2"
+                onClick={handleCopy}
+              >
+                <Copy />
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <Radio className="mt-4 mx-auto text-rose-400" size={48} />
+            <p className="text-sm text-center">{file.name}</p>
+          </>
+        )}
+
+        <DialogFooter className="mt-4">
+          <Button variant={"secondary"} className="shrink-0" asChild>
+            <DialogClose>닫기</DialogClose>
+          </Button>
+          <Button
+            onClick={() => handleClick()}
+            disabled={isPending}
+            className="shrink w-full"
+          >
+            {isPending ? <Spinner /> : file.share ? "공유 중지" : "공유 하기"}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

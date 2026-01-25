@@ -10,13 +10,14 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { safeAwait } from "@/lib/safe-await";
-import { SubmitButton } from "@/components/submit-button";
 import { FolderType } from "@/types";
-import Form from "next/form";
-import { updateFolderAction } from "@/actions/folder-action-client";
+import { FormEvent } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { UpdateFolderPayload } from "@/client/api/folder.type";
+import { updateFolder } from "@/client/api/folder.api";
+import { Spinner } from "../spinner";
+import { useFolder } from "@/hooks/use-folder";
 
 interface Props {
   folder: FolderType;
@@ -25,26 +26,24 @@ interface Props {
 }
 
 export function FolderUpdateModal({ folder, isOpen, close }: Props) {
-  const router = useRouter();
-
-  const onSubmit = async (formData: FormData) => {
-    const name = formData.get("name")?.toString();
-
-    if (!name) {
-      toast.error("이름을 입력해주세요");
-      return;
-    }
-
-    const [, error] = await safeAwait(updateFolderAction(folder.id, { name }));
-
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-
-    toast.success("수정 완료");
-    router.refresh();
-    setTimeout(() => close(), 150);
+  const { folderId } = useFolder();
+  const queryClient = useQueryClient();
+  const { mutate, isPending } = useMutation({
+    mutationFn: (payLoad: UpdateFolderPayload) => updateFolder(payLoad),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["folder", folderId] });
+      toast.success("폴더 수정됨");
+      close();
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+  });
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const name = formData.get("name")!.toString();
+    mutate({ id: folder.id, name: name });
   };
 
   return (
@@ -53,31 +52,33 @@ export function FolderUpdateModal({ folder, isOpen, close }: Props) {
         <DialogHeader>
           <DialogTitle>폴더 이름 변경</DialogTitle>
           <DialogDescription>폴더 이름을 수정할 후 있습니다.</DialogDescription>
-          <Form action={onSubmit}>
-            <label
-              htmlFor="name"
-              className="mt-2 hidden sm:block text-sm font-medium opacity-70"
-            >
-              파일 이름
-            </label>
-            <input
-              id="name"
-              name="name"
-              defaultValue={folder.name}
-              placeholder="파일 이름을 입력해주세요"
-              className="mt-2 p-4 w-full rounded border"
-              minLength={2}
-            />
-            <DialogFooter className="mt-4">
-              <DialogClose asChild>
-                <Button variant={"secondary"} className="shrink-0">
-                  닫기
-                </Button>
-              </DialogClose>
-              <SubmitButton text="이름 변경" className="shrink w-full" />
-            </DialogFooter>
-          </Form>
         </DialogHeader>
+        <form onSubmit={handleSubmit}>
+          <label
+            htmlFor="name"
+            className="mt-2 hidden sm:block text-sm font-medium opacity-70"
+          >
+            파일 이름
+          </label>
+          <input
+            id="name"
+            name="name"
+            defaultValue={folder.name}
+            placeholder="파일 이름을 입력해주세요"
+            className="mt-2 p-4 w-full rounded border"
+            minLength={2}
+          />
+          <DialogFooter className="mt-4">
+            <DialogClose asChild>
+              <Button variant={"secondary"} className="shrink-0">
+                닫기
+              </Button>
+            </DialogClose>
+            <Button className="shrink w-full">
+              {isPending ? <Spinner /> : "이름 변경"}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

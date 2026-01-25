@@ -1,8 +1,8 @@
 import { handleError } from "@/lib/handle-error";
 import { getSession } from "@/lib/session";
-import { patchFileById } from "@/services/file-service";
+import { updateFileSchema } from "@/server/schemas/file.schema";
+import { updateFile } from "@/server/services/file.service";
 import { NextRequest, NextResponse } from "next/server";
-import { patchFileSchema } from "@/schemas/file-schema";
 
 interface Props {
   params: Promise<{ fileId: string }>;
@@ -15,10 +15,10 @@ export default async function PATCH(req: NextRequest, { params }: Props) {
     const body = await req.json();
 
     // 1. 입력값 검증
-    const data = patchFileSchema.parse(body);
+    const _body = updateFileSchema.parse(body);
 
     // 2. 파일 수정
-    const file = await patchFileById(session.user!.id, fileId, data);
+    const file = await updateFile(session.user!.id, fileId, _body);
 
     return NextResponse.json({ file });
   } catch (err) {

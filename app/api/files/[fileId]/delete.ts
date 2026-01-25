@@ -1,7 +1,7 @@
 import { getSession } from "@/lib/session";
 import { NextRequest, NextResponse } from "next/server";
 import { handleError } from "@/lib/handle-error";
-import { deleteFileById } from "@/services/file-service";
+import { deleteFileById } from "@/server/services/file.service";
 
 interface Props {
   params: Promise<{ fileId: string }>;

@@ -1,8 +1,8 @@
 import { handleError } from "@/lib/handle-error";
 import { getSession } from "@/lib/session";
 import { NextRequest, NextResponse } from "next/server";
-import { postFolderSchema } from "@/schemas/folder-schema";
-import { postFolder } from "@/services/folder-service";
+import { createFolder } from "@/server/services/folder.service";
+import { createFolderSchema } from "@/server/schemas/folder.schema";
 
 export default async function POST(req: NextRequest) {
   try {
@@ -10,10 +10,10 @@ export default async function POST(req: NextRequest) {
     const body = await req.json();
 
     // 1. 입력값 검증
-    const { name, parentFolderId } = postFolderSchema.parse(body);
+    const _body = createFolderSchema.parse(body);
 
     // 2. 폴더 생성
-    const folder = await postFolder(session.user!.id, name, parentFolderId);
+    const folder = await createFolder(session.user!.id, _body);
 
     return NextResponse.json({ folder });
   } catch (err) {

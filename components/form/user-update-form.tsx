@@ -1,42 +1,44 @@
 "use client";
 
-import Form from "next/form";
 import { toast } from "sonner";
-import { safeAwait } from "@/lib/safe-await";
-import { SubmitButton } from "@/components/submit-button";
-import { updatePasswordAction } from "@/actions/user-action-client";
+import { FormEvent, useRef } from "react";
+import { updateUser } from "@/client/api/user.api";
+import { useMutation } from "@tanstack/react-query";
+import { UpdateUserPayload } from "@/client/api/user.type";
 import { UserDeleteModal } from "@/components/modal/user-delete-modal";
+import { Spinner } from "@/components/spinner";
+import { Button } from "@/components/ui/button";
 
 export function UserUpdateForm() {
-  const onSubmit = async (formData: FormData) => {
-    const oldPassword = formData.get("oldPassword")?.toString();
-    const newPassword = formData.get("newPassword")?.toString();
-    const newPasswordConfirm = formData.get("newPasswordConfirm")?.toString();
+  const ref = useRef<HTMLFormElement>(null);
+  const { mutate, isPending } = useMutation({
+    mutationFn: (payLoad: UpdateUserPayload) => updateUser(payLoad),
+    onSuccess: () => {
+      toast.success("패스워드 수정 성공");
+      ref.current?.reset();
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+  });
 
-    if (!oldPassword || !newPassword) {
-      toast.error("패스워드를 입력해주세요");
-      return;
-    }
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const oldPassword = formData.get("oldPassword")!.toString();
+    const newPassword = formData.get("newPassword")!.toString();
+    const newPasswordConfirm = formData.get("newPasswordConfirm")!.toString();
 
     if (newPassword !== newPasswordConfirm) {
-      toast.error("비밀번호가 일치하지 않습니다");
+      toast.error("비밀번호 확인이 일치하지 않습니다");
       return;
     }
 
-    const [, error] = await safeAwait(
-      updatePasswordAction(oldPassword, newPassword)
-    );
-
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-
-    toast.success("수정 완료");
+    mutate({ oldPassword, newPassword });
   };
 
   return (
-    <Form action={onSubmit} className="mt-2 space-y-4">
+    <form ref={ref} onSubmit={handleSubmit} className="mt-2 space-y-4">
       <label htmlFor="oldPassword" className="sr-only">
         기존 비밀번호
       </label>
@@ -75,8 +77,10 @@ export function UserUpdateForm() {
       />
       <div className="flex gap-2">
         <UserDeleteModal />
-        <SubmitButton text="비밀번호 수정" className="w-full" />
+        <Button className="w-full">
+          {isPending ? <Spinner /> : "비밀번호 수정"}
+        </Button>
       </div>
-    </Form>
+    </form>
   );
 }

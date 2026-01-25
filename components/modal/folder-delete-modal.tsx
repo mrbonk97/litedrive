@@ -11,13 +11,13 @@ import {
 } from "@/components/ui/dialog";
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Shredder } from "lucide-react";
-import { useState } from "react";
-import { safeAwait } from "@/lib/safe-await";
 import { FolderType } from "@/types";
-import { deleteFolderAction } from "@/actions/folder-action-client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { deleteFolder } from "@/client/api/folder.api";
+import { DeleteFolderPayload } from "@/client/api/folder.type";
+import { useFolder } from "@/hooks/use-folder";
 
 interface Props {
   folder: FolderType;
@@ -26,23 +26,19 @@ interface Props {
 }
 
 export function FolderDeleteModal({ folder, isOpen, close }: Props) {
-  const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const onSubmit = async () => {
-    setIsSubmitting(true);
-    const [, error] = await safeAwait(deleteFolderAction(folder.id));
-
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-
-    toast.success("삭제 완료");
-    router.refresh();
-    setIsSubmitting(false);
-    setTimeout(() => close(), 150);
-  };
+  const { folderId } = useFolder();
+  const queryClient = useQueryClient();
+  const { isPending, mutate } = useMutation({
+    mutationFn: (payLoad: DeleteFolderPayload) => deleteFolder(payLoad),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["folder", folderId] });
+      toast.success("폴더 삭제됨");
+      close();
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+  });
 
   return (
     <Dialog open={isOpen} onOpenChange={() => close()}>
@@ -50,24 +46,24 @@ export function FolderDeleteModal({ folder, isOpen, close }: Props) {
         <DialogHeader>
           <DialogTitle>폴더 삭제</DialogTitle>
           <DialogDescription>폴더를 삭제할 수 있습니다.</DialogDescription>
-
-          <Shredder className="mt-16 mx-auto text-destructive" size={48} />
-          <p className="mt-4 text-sm text-center">{folder.name}</p>
-
-          <DialogFooter className="mt-16">
-            <Button variant={"secondary"} className="shrink-0" asChild>
-              <DialogClose>닫기</DialogClose>
-            </Button>
-            <Button
-              onClick={onSubmit}
-              variant={"destructive"}
-              disabled={isSubmitting}
-              className="shrink w-full"
-            >
-              {isSubmitting ? <Spinner /> : "삭제"}
-            </Button>
-          </DialogFooter>
         </DialogHeader>
+
+        <Shredder className="mt-4 mx-auto text-destructive" size={48} />
+        <p className="text-sm text-center">{folder.name}</p>
+
+        <DialogFooter className="mt-4">
+          <Button variant={"secondary"} className="shrink-0" asChild>
+            <DialogClose>닫기</DialogClose>
+          </Button>
+          <Button
+            onClick={() => mutate({ id: folder.id })}
+            variant={"destructive"}
+            disabled={isPending}
+            className="shrink w-full"
+          >
+            {isPending ? <Spinner /> : "삭제"}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

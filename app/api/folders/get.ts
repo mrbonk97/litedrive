@@ -1,13 +1,13 @@
 import { handleError } from "@/lib/handle-error";
 import { getSession } from "@/lib/session";
+import { getRootFolder } from "@/server/services/folder.service";
 import { NextRequest, NextResponse } from "next/server";
-import { getRootFolder } from "@/services/folder-service";
 
 export default async function GET(req: NextRequest) {
   try {
     const session = await getSession();
 
-    // // 1. 입력값 검증
+    // 1. 입력값 검증
     const params = req.nextUrl.searchParams;
     const q = params.get("q");
     const filter = params.get("filter");

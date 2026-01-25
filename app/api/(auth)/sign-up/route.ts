@@ -1,7 +1,7 @@
 import { handleError } from "@/lib/handle-error";
 import { createSession } from "@/lib/session";
-import { registerSchema } from "@/schemas/auth-schema";
-import { registerUser } from "@/services/user-service";
+import { signUpSchema } from "@/server/schemas/auth.schema";
+import { signUp } from "@/server/services/auth.service";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -9,10 +9,10 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
 
     // 1. 입력값 검증
-    const { username, password } = registerSchema.parse(body);
+    const _body = signUpSchema.parse(body);
 
     // 2. 회원 가입
-    const user = await registerUser(username, password);
+    const user = await signUp(_body);
 
     // 3. 세션 발급
     await createSession(user.id, user.username);

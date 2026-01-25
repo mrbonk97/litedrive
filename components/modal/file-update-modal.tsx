@@ -9,14 +9,15 @@ import {
   DialogClose,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { safeAwait } from "@/lib/safe-await";
-import { updateFileAction } from "@/actions/file-action-client";
-import { SubmitButton } from "@/components/submit-button";
 import { FileType } from "@/types";
-import Form from "next/form";
+import { FormEvent } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { UpdateFilePayload } from "@/client/api/file.type";
+import { updateFile } from "@/client/api/file.api";
+import { useFolder } from "@/hooks/use-folder";
 
 interface Props {
   file: FileType;
@@ -25,26 +26,29 @@ interface Props {
 }
 
 export function FileUpdateModal({ file, isOpen, close }: Props) {
-  const router = useRouter();
+  const { folderId } = useFolder();
+  const queryClient = useQueryClient();
+  const { isPending, mutate } = useMutation({
+    mutationFn: (payLoad: UpdateFilePayload) => updateFile(payLoad),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["folder", folderId] });
+      toast.success("파일 수정됨");
+      close();
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+  });
 
-  const onSubmit = async (formData: FormData) => {
-    const name = formData.get("name")?.toString();
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const name = formData.get("name")!.toString();
 
-    if (!name) {
-      toast.error("이름을 입력해주세요");
-      return;
-    }
-
-    const [, error] = await safeAwait(updateFileAction(file.id, { name }));
-
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-
-    toast.success("수정 완료");
-    router.refresh();
-    setTimeout(() => close(), 150);
+    mutate({
+      id: file.id,
+      name: name,
+    });
   };
 
   return (
@@ -53,33 +57,40 @@ export function FileUpdateModal({ file, isOpen, close }: Props) {
         <DialogHeader>
           <DialogTitle>파일 이름 변경</DialogTitle>
           <DialogDescription>파일 이름을 수정할 후 있습니다.</DialogDescription>
-          <Form action={onSubmit}>
-            <label
-              htmlFor="name"
-              className="mt-2 hidden sm:block text-sm font-medium opacity-70"
-            >
-              파일 이름
-            </label>
-            <input
-              id="name"
-              name="name"
-              required
-              minLength={2}
-              defaultValue={file.name}
-              placeholder="파일 이름을 입력해주세요"
-              className="mt-2 p-4 w-full rounded border"
-            />
-
-            <DialogFooter className="mt-4">
-              <DialogClose asChild>
-                <Button variant={"secondary"} className="shrink-0">
-                  닫기
-                </Button>
-              </DialogClose>
-              <SubmitButton text="이름 변경" className="shrink w-full" />
-            </DialogFooter>
-          </Form>
         </DialogHeader>
+
+        <form onSubmit={handleSubmit}>
+          <label
+            htmlFor="name"
+            className="mt-2 hidden sm:block text-sm font-medium opacity-70"
+          >
+            파일 이름
+          </label>
+          <input
+            id="name"
+            name="name"
+            required
+            minLength={2}
+            defaultValue={file.name}
+            placeholder="파일 이름을 입력해주세요"
+            className="mt-2 p-4 w-full rounded border"
+          />
+
+          <DialogFooter className="mt-4">
+            <DialogClose asChild>
+              <Button variant={"secondary"} className="shrink-0">
+                닫기
+              </Button>
+            </DialogClose>
+            <Button
+              type="submit"
+              disabled={isPending}
+              className="shrink w-full"
+            >
+              {isPending ? <Spinner /> : "이름 변경"}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );
