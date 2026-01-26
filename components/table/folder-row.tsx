@@ -13,14 +13,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Ellipsis } from "lucide-react";
 import { useState } from "react";
-import { useFolder } from "@/context/folder-context";
 import { FolderDeleteModal } from "@/components/modal/folder-delete-modal";
 import { FolderUpdateModal } from "@/components/modal/folder-update-modal";
-import { updateFolderAction } from "@/actions/folder-action-client";
-import { updateFileAction } from "@/actions/file-action-client";
-import { toast } from "sonner";
-import { safeAwait } from "@/lib/safe-await";
-import { useRouter } from "next/navigation";
+import { useDnd } from "@/hooks/use-dnd";
 
 interface Props {
   folder: FolderType;
@@ -29,8 +24,7 @@ interface Props {
 type Status = "IDLE" | "DELETE_OPEN" | "UPDATE_OPEN";
 
 export function FolderRow({ folder }: Props) {
-  const context = useFolder();
-  const router = useRouter();
+  const dnd = useDnd();
   const [status, setStatus] = useState<Status>("IDLE");
 
   const openModal = (status: Status) => {
@@ -41,48 +35,12 @@ export function FolderRow({ folder }: Props) {
     setStatus("IDLE");
   };
 
-  const handleDrop = async () => {
-    const dragRow = context.state.drag;
-    if (!dragRow) return;
-    if (dragRow.id === folder.id) return;
-
-    // folder → folder
-    if (dragRow.type === "folder") {
-      const [, error] = await safeAwait(
-        updateFolderAction(dragRow.id!, { parentFolderId: folder.id })
-      );
-
-      if (error) {
-        toast.error(error.message);
-        return;
-      }
-
-      toast.success("수정 완료");
-      setTimeout(() => router.refresh(), 150);
-    }
-
-    // file → folder
-    if (dragRow.type === "file") {
-      const [, error] = await safeAwait(
-        updateFileAction(dragRow.id!, { folderId: folder.id })
-      );
-
-      if (error) {
-        toast.error(error.message);
-        return;
-      }
-
-      toast.success("수정 완료");
-      setTimeout(() => router.refresh(), 150);
-    }
-  };
-
   return (
     <>
       <tr
         draggable
         onDragStart={() => {
-          context.dispatch({
+          dnd.dispatch({
             type: "DRAG_START",
             row: {
               id: folder.id,
@@ -93,7 +51,7 @@ export function FolderRow({ folder }: Props) {
         }}
         onDragOver={(e) => {
           e.preventDefault();
-          context.dispatch({
+          dnd.dispatch({
             type: "DRAG_OVER",
             row: {
               id: folder.id,
@@ -102,15 +60,19 @@ export function FolderRow({ folder }: Props) {
             },
           });
         }}
+        onDragLeave={(e) => {
+          e.preventDefault();
+          dnd.dispatch({
+            type: "DRAG_OVER",
+            row: null,
+          });
+        }}
         onDrop={async (e) => {
           e.preventDefault();
-          handleDrop();
-        }}
-        onDragEnd={() => {
-          context.dispatch({ type: "DRAG_END" });
+          dnd.drop();
         }}
         className={`hover:bg-secondary border-b ${
-          context.state.target?.id === folder.id
+          dnd.state.target?.id === folder.id
             ? "relative z-50 outline-2 outline-dashed outline-rose-400"
             : ""
         }`}
@@ -122,7 +84,7 @@ export function FolderRow({ folder }: Props) {
           >
             <Image
               src={
-                context.state.target?.id === folder.id
+                dnd.state.target?.id === folder.id
                   ? "/static/icons/069-open-folder.svg"
                   : "/static/icons/001-folder.svg"
               }

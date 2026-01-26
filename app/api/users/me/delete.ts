@@ -1,7 +1,7 @@
 import { handleError } from "@/lib/handle-error";
-import { getSession } from "@/lib/session";
-import { deleteUserSchema } from "@/schemas/auth-schema";
-import { deleteUser } from "@/services/user-service";
+import { destroySession, getSession } from "@/lib/session";
+import { deleteUserSchema } from "@/server/schemas/user.schema";
+import { deleteUser } from "@/server/services/user.service";
 import { NextRequest, NextResponse } from "next/server";
 
 export default async function DELETE(req: NextRequest) {
@@ -10,9 +10,10 @@ export default async function DELETE(req: NextRequest) {
     const body = await req.json();
 
     // 1. 입력값 검증
-    const { password } = deleteUserSchema.parse(body);
+    const _body = deleteUserSchema.parse(body);
 
-    await deleteUser(session.user!.id, password);
+    await deleteUser(session.user!.id, _body);
+    await destroySession();
 
     return new NextResponse(null, { status: 204 });
   } catch (err) {

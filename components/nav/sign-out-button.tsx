@@ -2,26 +2,25 @@
 
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { safeAwait } from "@/lib/safe-await";
-import { signOutAction } from "@/actions/auth-action-server";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { useMutation } from "@tanstack/react-query";
+import { signOut } from "@/client/api/auth.api";
 
 export function SignOutButton() {
   const router = useRouter();
-
-  const handleClick = async () => {
-    const [, error] = await safeAwait(signOutAction());
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-
-    toast.success("로그아웃 완료");
-    setTimeout(() => router.push("/sign-out"), 150);
-  };
+  const { mutate } = useMutation({
+    mutationFn: signOut,
+    onSuccess: () => {
+      toast.success("로그아웃 성공");
+      router.push("/sign-out");
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+  });
 
   return (
-    <DropdownMenuItem onClick={handleClick} className="cursor-pointer">
+    <DropdownMenuItem onClick={() => mutate()} className="cursor-pointer">
       로그아웃
     </DropdownMenuItem>
   );

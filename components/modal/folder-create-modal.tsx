@@ -10,49 +10,41 @@ import {
   DialogClose,
   DialogFooter,
 } from "@/components/ui/dialog";
-
 import { Button } from "@/components/ui/button";
-import { SubmitButton } from "@/components/submit-button";
+import { Spinner } from "@/components/spinner";
 import { FolderPlus } from "lucide-react";
 import { toast } from "sonner";
-import { useRef } from "react";
-import Form from "next/form";
-import { useRouter } from "next/navigation";
-import { safeAwait } from "@/lib/safe-await";
-import { createFolderAction } from "@/actions/folder-action-client";
+import { FormEvent, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createFolder } from "@/client/api/folder.api";
+import { CreateFolderPayload } from "@/client/api/folder.type";
+import { useFolder } from "@/hooks/use-folder";
 
-interface Props {
-  folderId: string | null;
-}
+export function FolderCreateModal() {
+  const { folderId } = useFolder();
+  const queryClient = useQueryClient();
+  const [isOpen, setIsOpen] = useState(false);
+  const { mutate, isPending } = useMutation({
+    mutationFn: (payLoad: CreateFolderPayload) => createFolder(payLoad),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["folder", folderId] });
+      toast.success("폴더를 생성했습니다.");
+      setIsOpen(false);
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+  });
 
-export function FolderCreateModal({ folderId }: Props) {
-  const router = useRouter();
-  const ref = useRef<HTMLButtonElement>(null);
-
-  const onSubmit = async (formData: FormData) => {
-    const name = formData.get("name")?.toString();
-
-    if (!name) {
-      toast.error("이름을 입력해주세요");
-      return;
-    }
-
-    const [, error] = await safeAwait(createFolderAction(name, folderId));
-
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-
-    toast.success("폴더 생성 완료");
-    router.refresh();
-    setTimeout(() => {
-      ref.current?.click();
-    }, 150);
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const name = formData.get("name")!.toString();
+    mutate({ name: name, parentFolderId: folderId });
   };
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={(o) => setIsOpen(o)}>
       <DialogTrigger asChild>
         <Button className="w-full">
           <span className="text-base">폴더 생성</span>
@@ -63,31 +55,34 @@ export function FolderCreateModal({ folderId }: Props) {
         <DialogHeader>
           <DialogTitle>폴더 생성</DialogTitle>
           <DialogDescription>현재 경로에 폴더를 추가합니다.</DialogDescription>
-          <Form action={onSubmit}>
-            <label
-              htmlFor="name"
-              className="mt-2 hidden sm:block text-sm font-medium opacity-70"
-            >
-              폴더명
-            </label>
-            <input
-              id="name"
-              name="name"
-              placeholder="폴더명 입력해주세요"
-              className="mt-2 p-4 w-full border rounded"
-              required
-              minLength={2}
-            />
-            <DialogFooter className="mt-4">
-              <DialogClose asChild>
-                <Button ref={ref} variant={"secondary"} className="shrink-0">
-                  닫기
-                </Button>
-              </DialogClose>
-              <SubmitButton className="shrink w-full" text="폴더 생성" />
-            </DialogFooter>
-          </Form>
         </DialogHeader>
+
+        <form onSubmit={handleSubmit}>
+          <label
+            htmlFor="name"
+            className="hidden sm:block text-sm font-medium opacity-70"
+          >
+            폴더명
+          </label>
+          <input
+            id="name"
+            name="name"
+            placeholder="폴더명 입력해주세요"
+            className="mt-2 p-4 w-full border rounded"
+            required
+            minLength={2}
+          />
+          <DialogFooter className="mt-4">
+            <DialogClose asChild>
+              <Button variant={"secondary"} className="shrink-0">
+                닫기
+              </Button>
+            </DialogClose>
+            <Button className="shrink w-full">
+              {isPending ? <Spinner /> : "폴더 생성"}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );
