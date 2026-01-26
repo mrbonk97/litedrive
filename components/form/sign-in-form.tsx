@@ -4,7 +4,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
-import { SignIn } from "@/client/api/auth.api";
+import { signIn } from "@/client/api/auth.api";
 import { SignInPayload } from "@/client/api/auth.type";
 import { FormEvent } from "react";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,7 @@ export function SignInForm() {
   const router = useRouter();
 
   const { isPending, mutate } = useMutation({
-    mutationFn: (payLoad: SignInPayload) => SignIn(payLoad),
+    mutationFn: (payload: SignInPayload) => signIn(payload),
     onSuccess: () => {
       toast.success("로그인 성공");
       router.push("/folders");

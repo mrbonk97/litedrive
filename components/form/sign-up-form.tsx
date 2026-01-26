@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { SignUpPayload } from "@/client/api/auth.type";
 import { useMutation } from "@tanstack/react-query";
-import { SignUp } from "@/client/api/auth.api";
+import { signUp } from "@/client/api/auth.api";
 import { FormEvent } from "react";
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 export function SignUpForm() {
   const router = useRouter();
   const { isPending, mutate } = useMutation({
-    mutationFn: (payLoad: SignUpPayload) => SignUp(payLoad),
+    mutationFn: (payload: SignUpPayload) => signUp(payload),
     onSuccess: () => {
       toast.success("회원가입 성공");
       router.push("/folders");

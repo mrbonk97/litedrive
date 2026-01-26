@@ -9,6 +9,7 @@ export enum ErrorCode {
   FILE_NOT_FOUND = "파일을 찾을 수 없습니다.",
   INVALID_PASSWORD = "패스워드가 올바르지 않습니다.",
   INTERNAL_ERROR = "서버 오류",
+  INVALID_SHARE_CODE = "다운로드 코드가 올바르지 않습니다",
 }
 
 export function handleError(err: unknown) {
@@ -20,8 +21,15 @@ export function handleError(err: unknown) {
 
     return NextResponse.json(
       { message: "입력값이 올바르지 않습니다", errors: tree },
-      { status: 400 },
+      { status: 400 }
     );
   }
+
+  if (err instanceof Error) {
+    return NextResponse.json({ message: err.message }, { status: 400 });
+  }
+
   return NextResponse.json({ message: "서버 오류" }, { status: 500 });
 }
+
+export class CustomError extends Error {}

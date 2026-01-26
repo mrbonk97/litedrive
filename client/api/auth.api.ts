@@ -1,6 +1,6 @@
 import { SignInPayload, SignUpPayload } from "./auth.type";
 
-export async function SignIn(payload: SignInPayload) {
+export async function signIn(payload: SignInPayload) {
   const { username, password } = payload;
 
   const res = await fetch("/api/sign-in", {
@@ -10,11 +10,12 @@ export async function SignIn(payload: SignInPayload) {
   });
 
   if (!res.ok) {
-    throw new Error("로그인 중 오류 발생");
+    const { message } = await res.json();
+    throw new Error(message || "로그인 중 오류 발생");
   }
 }
 
-export async function SignUp(payload: SignUpPayload) {
+export async function signUp(payload: SignUpPayload) {
   const { username, password } = payload;
 
   const res = await fetch("/api/sign-up", {
@@ -24,7 +25,8 @@ export async function SignUp(payload: SignUpPayload) {
   });
 
   if (!res.ok) {
-    throw new Error("회원가입 중 오류 발생");
+    const { message } = await res.json();
+    throw new Error(message || "회원가입 중 오류 발생");
   }
 }
 
@@ -36,6 +38,6 @@ export async function signOut() {
 
   if (!res.ok) {
     const { message } = await res.json();
-    throw new Error(message ?? "로그아웃 중 오류가 발생했습니다.");
+    throw new Error(message || "로그아웃 중 오류 발생");
   }
 }

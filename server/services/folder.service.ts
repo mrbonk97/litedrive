@@ -1,6 +1,6 @@
 import { db } from "@/db/db";
 import { ErrorCode } from "@/lib/handle-error";
-import { and, eq, isNull, like, sql } from "drizzle-orm";
+import { and, desc, eq, isNull, like, sql } from "drizzle-orm";
 import { files, folders, users } from "@/db/schema";
 import {
   CreateFolderInput,
@@ -10,10 +10,12 @@ import {
 export async function getRootFolder(
   userId: string,
   q: string | null,
-  filter: string | null,
+  filter: string | null
 ) {
   // 검색을 했을 때
   if (q?.trim()) {
+    const keyword = `%${q.toLowerCase()}%`;
+
     const _files = await db
       .select({
         id: files.id,
@@ -31,12 +33,12 @@ export async function getRootFolder(
       .innerJoin(users, eq(files.ownerId, users.id))
       .where(
         and(
-          like(sql`lower(${files.name})`, `%${q.toLowerCase()}%`),
+          like(sql`lower(${files.name})`, `${keyword}`),
           eq(files.ownerId, userId),
-          eq(files.uploadStatus, "success"),
-        ),
+          eq(files.uploadStatus, "success")
+        )
       )
-      .orderBy(files.createdAt);
+      .orderBy(desc(files.createdAt));
 
     const _folders = await db
       .select({
@@ -50,8 +52,8 @@ export async function getRootFolder(
       })
       .from(folders)
       .innerJoin(users, eq(folders.ownerId, users.id))
-      .where(and(like(folders.name, `%${q}%`), eq(folders.ownerId, userId)))
-      .orderBy(folders.createdAt);
+      .where(and(like(folders.name, keyword), eq(folders.ownerId, userId)))
+      .orderBy(desc(folders.createdAt));
 
     return { files: _files, folders: _folders };
   }
@@ -77,10 +79,10 @@ export async function getRootFolder(
         and(
           eq(files.share, true),
           eq(files.ownerId, userId),
-          eq(files.uploadStatus, "success"),
-        ),
+          eq(files.uploadStatus, "success")
+        )
       )
-      .orderBy(files.createdAt);
+      .orderBy(desc(files.createdAt));
 
     return { files: _files, folders: [] };
   }
@@ -104,10 +106,10 @@ export async function getRootFolder(
       and(
         isNull(files.folderId),
         eq(files.ownerId, userId),
-        eq(files.uploadStatus, "success"),
-      ),
+        eq(files.uploadStatus, "success")
+      )
     )
-    .orderBy(files.createdAt);
+    .orderBy(desc(files.createdAt));
 
   const _folders = await db
     .select({
@@ -122,7 +124,7 @@ export async function getRootFolder(
     .from(folders)
     .innerJoin(users, eq(folders.ownerId, users.id))
     .where(and(isNull(folders.parentFolderId), eq(folders.ownerId, userId)))
-    .orderBy(folders.createdAt);
+    .orderBy(desc(folders.createdAt));
 
   return { files: _files, folders: _folders };
 }
@@ -147,8 +149,8 @@ export async function findFolder(userId: string, folderId: string) {
       and(
         eq(files.folderId, folderId),
         eq(files.ownerId, userId),
-        eq(files.uploadStatus, "success"),
-      ),
+        eq(files.uploadStatus, "success")
+      )
     )
     .orderBy(files.createdAt);
 
@@ -165,7 +167,7 @@ export async function findFolder(userId: string, folderId: string) {
     .from(folders)
     .innerJoin(users, eq(folders.ownerId, users.id))
     .where(
-      and(eq(folders.parentFolderId, folderId), eq(folders.ownerId, userId)),
+      and(eq(folders.parentFolderId, folderId), eq(folders.ownerId, userId))
     )
     .orderBy(folders.createdAt);
 
@@ -230,7 +232,7 @@ export async function deleteFolder(userId: string, folderId: string) {
 export async function updateFolder(
   userId: string,
   folderId: string,
-  input: UpdateFolderInput,
+  input: UpdateFolderInput
 ) {
   const [folder] = await db
     .update(folders)

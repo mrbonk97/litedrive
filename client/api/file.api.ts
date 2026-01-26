@@ -14,7 +14,7 @@ export async function downloadFile(payload: DownloadFilePayload) {
 
   if (!res.ok) {
     const { message } = await res.json();
-    throw new Error(message || "파일 다운로드 요청 중 요류가 발생했습니다.");
+    throw new Error(message ?? "파일 다운로드 요청 중 요류가 발생했습니다.");
   }
 
   return await res.json();
@@ -83,7 +83,7 @@ export async function downloadFileByCode(payload: DownloadFileByCodePayload) {
 
   if (!res.ok) {
     const { message } = await res.json();
-    throw new Error(message || "공유 파일 확인 중 오류가 발생했습니다.");
+    throw new Error(message || "파일 다운로드 중 오류가 발생했습니다.");
   }
 
   return await res.json();
