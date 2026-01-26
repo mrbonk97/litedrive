@@ -1,11 +1,10 @@
-export async function uploadtoS3(url: string, file: File) {
-  const formData = new FormData();
-
-  formData.append("body", file);
+export async function uploadToR2(url: string, file: File) {
   const res = await fetch(url, {
     method: "PUT",
-    body: formData,
-    mode: "cors",
+    headers: {
+      "Content-Type": file.type, // 서버에서 서명한 값과 반드시 일치
+    },
+    body: file,
   });
 
   if (!res.ok) {

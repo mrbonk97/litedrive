@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { handleError } from "@/lib/handle-error";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { s3Client } from "@/lib/tebi";
+import { s3Client } from "@/lib/s3";
 import { getFileById } from "@/server/services/file.service";
 
 interface Props {
@@ -17,15 +17,15 @@ export default async function GET(_: NextRequest, { params }: Props) {
 
     const file = await getFileById(session.user!.id, fileId);
 
-    const get_command = new GetObjectCommand({
+    const command = new GetObjectCommand({
       Bucket: "litedrive",
       Key: file.id,
-      ResponseContentDisposition: `attachment; filename="${encodeURIComponent(
-        file.name,
-      )}"`,
+      ResponseContentDisposition: `attachment; filename="${file.name}"`,
     });
 
-    const url = await getSignedUrl(s3Client, get_command, { expiresIn: 60 });
+    const url = await getSignedUrl(s3Client, command, {
+      expiresIn: 60,
+    });
 
     return NextResponse.json({ url });
   } catch (err) {

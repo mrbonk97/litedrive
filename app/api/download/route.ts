@@ -1,6 +1,6 @@
 import { ErrorCode } from "@/lib/handle-error";
 import { handleError } from "@/lib/handle-error";
-import { s3Client } from "@/lib/tebi";
+import { s3Client } from "@/lib/s3";
 import { getSharedFileById } from "@/server/services/file.service";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
@@ -17,15 +17,16 @@ export async function GET(req: NextRequest) {
 
     const file = await getSharedFileById(code);
 
-    const get_command = new GetObjectCommand({
+    const command = new GetObjectCommand({
       Bucket: "litedrive",
       Key: file.id,
-      ResponseContentDisposition: `attachment; filename="${encodeURIComponent(
-        file.name,
-      )}"`,
+      ResponseContentDisposition: `attachment; filename="${file.name}"`,
     });
 
-    const url = await getSignedUrl(s3Client, get_command, { expiresIn: 60 });
+    const url = await getSignedUrl(s3Client, command, {
+      expiresIn: 60,
+    });
+
     return NextResponse.json({ url });
   } catch (err) {
     return handleError(err);

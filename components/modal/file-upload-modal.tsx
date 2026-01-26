@@ -21,7 +21,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { UploadFilePayload } from "@/client/api/file.type";
 import { updateFile, uploadFile } from "@/client/api/file.api";
 import { useFolder } from "@/hooks/use-folder";
-import { uploadtoS3 } from "@/client/api/s3.api";
+import { uploadToR2 } from "@/client/api/s3.api";
 
 export function FileUploadModal() {
   const { folderId } = useFolder();
@@ -40,8 +40,8 @@ export function FileUploadModal() {
       const { file: createdFile, url } = await uploadFile({ folderId, file });
 
       try {
-        // 2. S3 업로드
-        await uploadtoS3(url, file);
+        // 2. R2 업로드
+        await uploadToR2(url, file);
 
         // 3. 성공 처리
         await updateFile({
@@ -66,7 +66,7 @@ export function FileUploadModal() {
     result.current = { success: 0, fail: 0 };
 
     const results = await Promise.allSettled(
-      files.map((file) => uploadMutation.mutateAsync({ folderId, file })),
+      files.map((file) => uploadMutation.mutateAsync({ folderId, file }))
     );
 
     results.forEach((res) => {
