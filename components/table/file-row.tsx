@@ -55,12 +55,12 @@ export function FileRow({ file }: Props) {
     <>
       <tr
         draggable
-        onDragStart={() =>
+        onDragStart={() => {
           dnd.dispatch({
             type: "DRAG_START",
             row: { id: file.id, parentId: null, type: "file" },
-          })
-        }
+          });
+        }}
         onDragEnd={() => dnd.dispatch({ type: "RESET" })}
         className={`hover:bg-secondary border-b [&>tr]:last:border-b-0`}
       >

@@ -104,7 +104,7 @@ export function DnDProvider({ children }: Props) {
     }
 
     // 같은 부모면 무시
-    if (drag.parentId === target.id) {
+    if (drag.type === "folder" && drag.parentId === target.id) {
       dispatch({ type: "RESET" });
       return;
     }
@@ -115,7 +115,6 @@ export function DnDProvider({ children }: Props) {
     }
 
     if (drag.type === "folder") {
-      console.log("타켓은요", target.id);
       folderMutation.mutate({
         id: drag.id,
         parentFolderId: target.id,
@@ -123,7 +122,6 @@ export function DnDProvider({ children }: Props) {
     }
 
     if (drag.type === "file") {
-      console.log("타켓은요", target.id);
       fileMutation.mutate({
         id: drag.id,
         folderId: target.id,

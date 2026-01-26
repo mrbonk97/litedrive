@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { Logo } from "@/components/nav/logo";
 import { LEFT_MENU } from "@/constants";
-import { FolderCreateModal } from "../modal/folder-create-modal";
-import { FileUploadModal } from "../modal/file-upload-modal";
-import { SettingsModal } from "../modal/settings-modal";
+import { FolderCreateModal } from "@/components/modal/folder-create-modal";
+import { FileUploadModal } from "@/components/modal/file-upload-modal";
+import { SettingsModal } from "@/components/modal/settings-modal";
 
 export function Leftnav() {
   return (
@@ -21,17 +21,20 @@ export function Leftnav() {
         <div className="text-xs text-right font-medium text-muted-foreground">
           GENERAL
         </div>
-        <ul className="mt-2">
-          {LEFT_MENU.map((sub) => (
-            <Link
-              href={sub.url}
-              key={sub.url}
-              className={`p-2 flex items-center justify-end gap-2 rounded text-rose-400 hover:bg-sidebar-accent aria-[current='page']:bg-sidebar-accent`}
-            >
-              <span className="text-sm font-medium">{sub.title}</span>
-              {sub.icon}
-            </Link>
-          ))}
+        <ul className="mt-2 space-y-2">
+          {LEFT_MENU.map((item) => {
+            return (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  className={`p-2 flex items-center justify-end gap-2 rounded text-rose-400 hover:bg-sidebar-accent aria-[current='page']:bg-sidebar-accent`}
+                >
+                  <span className="text-sm font-medium">{item.title}</span>
+                  {item.icon}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       </nav>
       <div className="mt-2 p-2 space-y-2 border-b">

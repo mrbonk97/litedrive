@@ -3,7 +3,7 @@ import { Toaster } from "sonner";
 import type { Metadata } from "next";
 import { pretendard } from "@/lib/fonts";
 import { TanstackProvider } from "@/context/tanstack-provider";
-import { ThemeProvider } from "@/context/theme-context";
+import { ThemeProvider } from "@/context/theme-provider";
 
 export const metadata: Metadata = {
   title: "LiteDrive",
