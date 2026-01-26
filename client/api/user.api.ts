@@ -8,7 +8,8 @@ export async function updateUser(payload: UpdateUserPayload) {
   });
 
   if (!res.ok) {
-    throw new Error("패스워드 변경 중 오류 발생");
+    const { message } = await res.json();
+    throw new Error(message || "패스워드 변경 중 오류 발생");
   }
 }
 
@@ -20,6 +21,7 @@ export async function deleteUser(payload: DeleteUserPayload) {
   });
 
   if (!res.ok) {
-    throw new Error("회원 탈퇴 중 중 오류 발생");
+    const { message } = await res.json();
+    throw new Error(message || "회원 탈퇴 중 중 오류 발생");
   }
 }

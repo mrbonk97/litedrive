@@ -52,10 +52,10 @@ export async function deleteFileById(userId: string, fileId: string) {
 export async function updateFile(
   userId: string,
   fileId: string,
-  input: UpdateFileInput,
+  input: UpdateFileInput
 ) {
   const updateData = Object.fromEntries(
-    Object.entries(input).filter(([, v]) => v !== undefined),
+    Object.entries(input).filter(([, v]) => v !== undefined)
   );
 
   const [file] = await db
@@ -78,7 +78,7 @@ export async function getSharedFileById(fileId: string) {
     .where(and(eq(files.id, fileId), eq(files.share, true)));
 
   if (!file) {
-    throw new Error(ErrorCode.UNAUTHORIZED);
+    throw new Error(ErrorCode.INVALID_SHARE_CODE);
   }
 
   return file;
