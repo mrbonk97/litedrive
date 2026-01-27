@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { signIn } from "@/client/api/auth.api";
 import { SignInPayload } from "@/client/api/auth.type";
 import { FormEvent } from "react";
@@ -12,11 +12,12 @@ import { Spinner } from "@/components/spinner";
 
 export function SignInForm() {
   const router = useRouter();
-
+  const queryClient = useQueryClient();
   const { isPending, mutate } = useMutation({
     mutationFn: (payload: SignInPayload) => signIn(payload),
     onSuccess: () => {
       toast.success("로그인 성공");
+      queryClient.clear();
       router.push("/folders");
     },
     onError: (err) => {

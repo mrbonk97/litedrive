@@ -13,7 +13,7 @@ import {
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { DeleteUserPayload } from "@/client/api/user.type";
 import { deleteUser } from "@/client/api/user.api";
 import { FormEvent } from "react";
@@ -21,10 +21,12 @@ import { Spinner } from "@/components/spinner";
 
 export function UserDeleteModal() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { mutate, isPending } = useMutation({
     mutationFn: (payLoad: DeleteUserPayload) => deleteUser(payLoad),
     onSuccess: () => {
       toast.success("회원 탈퇴 성공");
+      queryClient.clear();
       router.push("/");
     },
     onError: (err) => {

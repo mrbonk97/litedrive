@@ -3,18 +3,20 @@
 import { toast } from "sonner";
 import { FormEvent, useRef } from "react";
 import { updateUser } from "@/client/api/user.api";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { UpdateUserPayload } from "@/client/api/user.type";
 import { UserDeleteModal } from "@/components/modal/user-delete-modal";
 import { Spinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
 
 export function UserUpdateForm() {
+  const queryClient = useQueryClient();
   const ref = useRef<HTMLFormElement>(null);
   const { mutate, isPending } = useMutation({
     mutationFn: (payLoad: UpdateUserPayload) => updateUser(payLoad),
     onSuccess: () => {
       toast.success("패스워드 수정 성공");
+      queryClient.clear();
       ref.current?.reset();
     },
     onError: (err) => {
