@@ -1,3 +1,4 @@
+import { FileType } from "@/types";
 import {
   DeleteFilePayload,
   DownloadFileByCodePayload,
@@ -20,16 +21,13 @@ export async function downloadFile(payload: DownloadFilePayload) {
   return await res.json();
 }
 
-export async function uploadFile(payload: UploadFilePayload) {
+export async function uploadFile(
+  payload: UploadFilePayload
+): Promise<{ file: FileType; token: string }> {
   const res = await fetch(`/api/files`, {
     method: "POST",
     credentials: "include",
-    body: JSON.stringify({
-      name: payload.file.name,
-      type: payload.file.type,
-      size: payload.file.size,
-      folderId: payload.folderId,
-    }),
+    body: JSON.stringify(payload),
   });
 
   if (!res.ok) {

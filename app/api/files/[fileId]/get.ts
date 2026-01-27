@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { handleError } from "@/lib/handle-error";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { s3Client } from "@/lib/s3";
 import { getFileById } from "@/server/services/file.service";
+import { r2Client } from "@/lib/r2";
 
 interface Props {
   params: Promise<{ fileId: string }>;
@@ -19,11 +19,11 @@ export default async function GET(_: NextRequest, { params }: Props) {
 
     const command = new GetObjectCommand({
       Bucket: "litedrive",
-      Key: file.id,
+      Key: `uploads/users/${session.user!.id}/${file.id}`,
       ResponseContentDisposition: `attachment; filename="${file.name}"`,
     });
 
-    const url = await getSignedUrl(s3Client, command, {
+    const url = await getSignedUrl(r2Client, command, {
       expiresIn: 60,
     });
 

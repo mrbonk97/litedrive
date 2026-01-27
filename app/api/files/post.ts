@@ -1,11 +1,9 @@
-import { handleError } from "@/lib/handle-error";
 import { getSession } from "@/lib/session";
+import { handleError } from "@/lib/handle-error";
 import { NextRequest, NextResponse } from "next/server";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { s3Client } from "@/lib/s3";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { uploadFileSchema } from "@/server/schemas/file.schema";
-import { uploadFile } from "@/server/services/file.service";
+import { createFile } from "@/server/services/file.service";
+import { createFileSchema } from "@/server/schemas/file.schema";
+import { generateJwt } from "@/lib/jwt";
 
 export default async function POST(req: NextRequest) {
   try {
@@ -13,23 +11,14 @@ export default async function POST(req: NextRequest) {
     const body = await req.json();
 
     // 1. 입력값 검증
-    const _body = uploadFileSchema.parse(body);
+    const _body = createFileSchema.parse(body);
 
-    // 2. 파일 DB에 등록
-    const file = await uploadFile(session.user!.id, _body);
+    // 2. 파일 Row 생성
+    const file = await createFile(session.user!.id, _body);
 
-    // 3. PreSignedUrl 발급
-    const command = new PutObjectCommand({
-      Bucket: "litedrive",
-      Key: file.id,
-      ContentType: file.type,
-    });
+    const token = await generateJwt(session.user!.id, file.id);
 
-    const url = await getSignedUrl(s3Client, command, {
-      expiresIn: 60, // 1분
-    });
-
-    return NextResponse.json({ file, url });
+    return NextResponse.json({ token, file }, { status: 201 });
   } catch (err) {
     return handleError(err);
   }

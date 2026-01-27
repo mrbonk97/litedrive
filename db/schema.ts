@@ -73,9 +73,7 @@ export const files = pgTable("files", {
   size: integer("size").notNull(),
 
   share: boolean("share").default(false).notNull(),
-
-  // 업로드가 덜 끝났을 때
-  uploadStatus: uploadStatusEnum("upload_status").default("pending").notNull(),
+  shareCode: text("share_code").unique(),
 
   ownerId: uuid("owner_id")
     .notNull()
@@ -86,6 +84,8 @@ export const files = pgTable("files", {
   folderId: uuid("folder_id").references(() => folders.id, {
     onDelete: "set null",
   }),
+
+  uploadStatus: uploadStatusEnum("upload_status").default("pending").notNull(),
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
