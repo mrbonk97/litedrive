@@ -4,7 +4,9 @@ export type DownloadFilePayload = {
 
 export type UploadFilePayload = {
   folderId: string | null;
-  file: File;
+  name: string;
+  type: string;
+  size: number;
 };
 
 export type DeleteFilePayload = {

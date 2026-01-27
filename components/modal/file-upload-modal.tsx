@@ -18,10 +18,9 @@ import { formatSize } from "@/lib/utils";
 import { useRef, useState } from "react";
 import { useFiles } from "@/hooks/use-file";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { UploadFilePayload } from "@/client/api/file.type";
 import { updateFile, uploadFile } from "@/client/api/file.api";
 import { useFolder } from "@/hooks/use-folder";
-import { uploadtoS3 } from "@/client/api/s3.api";
+import { uploadToR2 } from "@/client/api/r2.api";
 
 export function FileUploadModal() {
   const { folderId } = useFolder();
@@ -34,28 +33,26 @@ export function FileUploadModal() {
 
   const result = useRef({ success: 0, fail: 0 });
 
-  const uploadMutation = useMutation({
-    mutationFn: async ({ folderId, file }: UploadFilePayload) => {
-      // 1. 서버에 파일 생성 + presigned URL
-      const { file: createdFile, url } = await uploadFile({ folderId, file });
+  const { mutateAsync } = useMutation({
+    mutationFn: async ({
+      folderId,
+      file,
+    }: {
+      folderId: string;
+      file: File;
+    }) => {
+      const { file: createdFile, token } = await uploadFile({
+        folderId: folderId,
+        name: file.name,
+        size: file.size,
+        type: file.type,
+      });
 
       try {
-        // 2. S3 업로드
-        await uploadtoS3(url, file);
-
-        // 3. 성공 처리
-        await updateFile({
-          id: createdFile.id,
-          uploadStatus: "success",
-        });
+        await uploadToR2({ token: token, file: file });
+        await updateFile({ id: createdFile.id, uploadStatus: "success" });
       } catch (err) {
-        // 3. 실패 처리
-        await updateFile({
-          id: createdFile.id,
-          uploadStatus: "failed",
-        });
-
-        // 실패를 상위로 전파
+        await updateFile({ id: createdFile.id, uploadStatus: "failed" });
         throw err;
       }
     },
@@ -66,7 +63,7 @@ export function FileUploadModal() {
     result.current = { success: 0, fail: 0 };
 
     const results = await Promise.allSettled(
-      files.map((file) => uploadMutation.mutateAsync({ folderId, file })),
+      files.map((file) => mutateAsync({ folderId: folderId, file: file }))
     );
 
     results.forEach((res) => {

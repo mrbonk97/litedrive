@@ -145,13 +145,7 @@ export async function findFolder(userId: string, folderId: string) {
     })
     .from(files)
     .innerJoin(users, eq(files.ownerId, users.id))
-    .where(
-      and(
-        eq(files.folderId, folderId),
-        eq(files.ownerId, userId),
-        eq(files.uploadStatus, "success")
-      )
-    )
+    .where(and(eq(files.folderId, folderId), eq(files.ownerId, userId)))
     .orderBy(files.createdAt);
 
   const _folders = await db

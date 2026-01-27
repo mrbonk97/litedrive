@@ -16,6 +16,7 @@ export interface FileType {
   ownerId: string;
   folderId: string | null;
   share: boolean;
+  shareCode?: string;
   uploadStatus: UploadStatusType;
   ownerName: string;
   createdAt: string;
