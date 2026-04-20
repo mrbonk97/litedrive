@@ -61,7 +61,7 @@ function RootLayout({ children }: Props) {
       <body className={`${pretendard.className} antialiased`}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="light"
           enableSystem
           disableTransitionOnChange
         >

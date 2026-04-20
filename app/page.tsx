@@ -19,7 +19,7 @@ function LandingPage() {
           <Logo />
           <div className="flex gap-2">
             <Button className="py-2">
-              <Link href={"/sign-in"}>회원가입</Link>
+              <Link href={"/sign-up"}>회원가입</Link>
             </Button>
             <Button variant={"secondary"} className="py-2" asChild>
               <Link href={"/sign-in"}>로그인</Link>
