@@ -14,7 +14,9 @@ export function Logo({ className }: Props) {
       className={cn("h-6 flex items-center gap-2  text-rose-400", className)}
     >
       <Sparkle />
-      <span className={`text-3xl ${audioWide.className}`}>LiteDrive</span>
+      <span className={`text-lg md:text-2xl ${audioWide.className}`}>
+        LiteDrive
+      </span>
     </Link>
   );
 }
