@@ -3,7 +3,7 @@ import { z } from "zod";
 export const createFileSchema = z.object({
   name: z.string().min(2).max(128),
   size: z.number(),
-  type: z.string().max(64),
+  type: z.string().max(256),
   folderId: z.string().min(2).max(128).nullable(),
 });
 
