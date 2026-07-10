@@ -1,37 +1,23 @@
-export interface FolderType {
+export type FolderType = {
   id: string;
+  user_id: string;
+  parent_id: string | null;
   name: string;
-  ownerId: string;
-  ownerName: string;
-  parentFolderId: string;
-  createdAt: string;
-  updatedAt: string;
-}
+  created_at: string;
+  updated_at: string;
+};
 
-export interface FileType {
+export type FileType = {
   id: string;
+  user_id: string;
+  folder_id: string | null;
   name: string;
-  type: string;
   size: number;
-  ownerId: string;
-  folderId: string | null;
-  share: boolean;
-  shareCode?: string;
-  uploadStatus: UploadStatusType;
-  ownerName: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface RowType {
-  id: string | null;
-  parentId: string | null;
-  type: "file" | "folder";
-}
-
-export interface BreadCrumbType {
-  id: string;
-  name: string;
-}
-
-export type UploadStatusType = "pending" | "success" | "failed";
+  mime_type: string;
+  storage_path: string;
+  upload_status: "pending" | "success" | "fail";
+  is_shared: boolean;
+  share_token: string | null;
+  created_at: string;
+  updated_at: string;
+};

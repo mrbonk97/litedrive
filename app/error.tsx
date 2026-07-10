@@ -2,24 +2,25 @@
 
 import Link from "next/link";
 import { Bug } from "lucide-react";
-import { Logo } from "@/components/nav/logo";
+import { Logo } from "@/components/logo";
 
-interface Props {
-  error: Error;
-}
-
-export default function GlobalError({ error }: Props) {
+export default function GlobalError() {
   return (
-    <main className="p-4">
+    <main className="p-4 md:p-8 mx-auto max-w-5xl">
       <Logo />
-      <header className="mt-28 mx-auto max-w-4xl">
-        <h1 className="text-4xl font-bold text-rose-400">예상치 못한 오류가 발생했습니다</h1>
-        <Bug className="mt-16 text-rose-400" size={64} />
-        <pre className="mt-8 p-4 bg-secondary rounded text-sm">
-          오류: {error instanceof Error ? error.message : JSON.stringify(error)}
-        </pre>
+      <header className="mt-16">
+        <h1 className="text-4xl md:text-6xl font-bold text-rose-400">
+          예상치 못한 오류가 발생했습니다
+        </h1>
+        <Bug className="mt-8 text-rose-400" size={64} />
+        <div className="mt-8 p-4 md:p-8 rounded-lg bg-secondary text-sm whitespace-pre-line">
+          요청을 처리하지 못했습니다. 잠시 후 다시 시도해주세요.
+        </div>
         <div className="mt-8">
-          <Link href={"/"} className="block w-fit mx-auto hover:underline underline-offset-2">
+          <Link
+            href={"/"}
+            className="block w-fit mx-auto hover:underline underline-offset-2"
+          >
             처음화면으로 이동
           </Link>
         </div>

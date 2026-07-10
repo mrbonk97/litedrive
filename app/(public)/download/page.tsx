@@ -1,27 +1,33 @@
-import { DownloadShareFileForm } from "@/components/form/download-share-file-form";
-import { Logo } from "@/components/nav/logo";
 import { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "다운로드 - LiteDrive",
-};
+import { Logo } from "@/components/logo";
+import { ShareTokenForm } from "@/features/share/ui/share-token-form";
 
 interface Props {
-  searchParams: Promise<{ code?: string }>;
+  searchParams: Promise<{
+    code?: string;
+  }>;
 }
 
-async function DownloadPage({ searchParams }: Props) {
-  const { code } = await searchParams;
+export const metadata: Metadata = {
+  title: "다운로드",
+  description: "LiteDrive 공유 코드로 전달받은 파일을 확인하고 다운로드하세요.",
+  robots: {
+    index: false,
+    follow: false,
+    noarchive: true,
+  },
+};
+
+export default async function DownloadPage({ searchParams }: Props) {
+  const { code: _code } = await searchParams;
+  const code = _code?.trim();
 
   return (
-    <main className="p-4 pb-16 min-h-screen h-full bg-rose-200 flex items-center justify-center">
-      <h1 className="sr-only">공유 파일 다운로드</h1>
-      <div className="mx-auto p-8 max-w-md rounded-md w-full bg-background">
-        <Logo className="w-fit mx-auto" />
-        <DownloadShareFileForm defaultCode={code} />
-      </div>
+    <main className="p-4 sm:p-8 min-h-svh flex flex-col sm:items-center sm:justify-center sm:bg-rose-50">
+      <section className="mx-auto sm:mb-32 max-w-md w-full">
+        <Logo className="mr-auto w-fit" />
+        <ShareTokenForm defaultCode={code} />
+      </section>
     </main>
   );
 }
-
-export default DownloadPage;

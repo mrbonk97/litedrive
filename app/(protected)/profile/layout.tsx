@@ -1,23 +1,21 @@
-import { Metadata } from "next";
-import { ProfileTopnav } from "@/components/nav/profile-top-nav";
-import { Footer } from "@/components/nav/footer";
-
-export const metadata: Metadata = {
-  title: "프로필 - LiteDrive",
-};
+import { UserTopNav } from "@/features/navigation/ui/user-top-nav";
+import { Footer } from "@/components/footer";
+import { getCurrentUser } from "@/features/auth/api/get-current-user.api";
+import { createClient } from "@/lib/supabase/server";
 
 interface Props {
   children: React.ReactNode;
 }
 
-async function ProfileLayout({ children }: Props) {
+export default async function ProtectedLayout({ children }: Props) {
+  const supabase = await createClient();
+  const user = await getCurrentUser(supabase);
+
   return (
     <>
-      <ProfileTopnav />
+      <UserTopNav user={user} />
       {children}
       <Footer />
     </>
   );
 }
-
-export default ProfileLayout;
