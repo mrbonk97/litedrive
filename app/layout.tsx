@@ -2,15 +2,17 @@ import "./globals.css";
 import { Toaster } from "sonner";
 import type { Metadata } from "next";
 import { pretendard } from "@/lib/fonts";
-import { TanstackProvider } from "@/context/tanstack-provider";
-import { ThemeProvider } from "@/context/theme-provider";
+import { getSiteUrl, SITE_DESCRIPTION, SITE_NAME } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "LiteDrive",
-  description:
-    "LiteDrive, 최소한의 보안으로 최대한의 속도. 파일만을 위한 가장 단순한 공유 플랫폼.",
-  applicationName: "LiteDrive",
-  generator: "Next.js 15",
+  metadataBase: getSiteUrl(),
+  title: {
+    default: SITE_NAME,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  generator: "Next.js 16",
   keywords: [
     "LiteDrive",
     "파일 공유",
@@ -22,20 +24,26 @@ export const metadata: Metadata = {
     "보안 파일 공유",
   ],
   authors: [{ name: "mrbonk97", url: process.env.NEXT_PUBLIC_BASE_URL }],
-  creator: "LiteDrive",
-  publisher: "LiteDrive",
+  creator: SITE_NAME,
+  publisher: SITE_NAME,
+  category: "technology",
+  referrer: "origin-when-cross-origin",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   openGraph: {
-    title: "LiteDrive",
-    description:
-      "LiteDrive, 최소한의 보안으로 최대한의 속도. 파일만을 위한 가장 단순한 공유 플랫폼.",
-    url: process.env.NEXT_PUBLIC_BASE_URL,
-    siteName: "LiteDrive",
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+    url: "/",
+    siteName: SITE_NAME,
     images: [
       {
-        url: `${process.env.NEXT_PUBLIC_BASE_URL}/static/og-image.png`,
+        url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "LiteDrive - 쉽고 안전한 파일 공유",
+        alt: "LiteDrive - 개인정보 없이 쓰는 가벼운 파일 드라이브",
       },
     ],
     locale: "ko_KR",
@@ -44,33 +52,24 @@ export const metadata: Metadata = {
 
   twitter: {
     card: "summary_large_image",
-    title: "LiteDrive",
-    description:
-      "LiteDrive, 최소한의 보안으로 최대한의 속도. 파일만을 위한 가장 단순한 공유 플랫폼.",
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
     creator: "mrbonk97",
-    images: [`${process.env.NEXT_PUBLIC_BASE_URL}/static/og-image.png`],
+    images: ["/og-image.jpg"],
   },
 };
 
 interface Props {
   children: React.ReactNode;
 }
-function RootLayout({ children }: Props) {
+
+export default function RootLayout({ children }: Props) {
   return (
-    <html lang="ko" suppressHydrationWarning>
-      <body className={`${pretendard.className} antialiased`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <Toaster position="top-center" />
-          <TanstackProvider>{children}</TanstackProvider>
-        </ThemeProvider>
+    <html lang="ko" className="antialiased">
+      <body className={`${pretendard.className}`}>
+        <Toaster position="top-center" />
+        {children}
       </body>
     </html>
   );
 }
-
-export default RootLayout;

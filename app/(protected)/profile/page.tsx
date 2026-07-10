@@ -1,40 +1,34 @@
-import { getUserMe } from "@/client/api/user.api.ssr";
-import { UsageChart } from "@/components/chart/usage-chart";
-import { UserUpdateForm } from "@/components/form/user-update-form";
-import { UserRound } from "lucide-react";
+import { ChangePasswordForm } from "@/features/auth/ui/change-password-form";
+import { DeleteAccountDialog } from "@/features/auth/ui/delete-account-dialog";
+import { getCurrentUser } from "@/features/auth/api/get-current-user.api";
+import { getRecentFiles } from "@/features/files/api/get-recent-files.api";
+import { getFolderCount } from "@/features/folders/api/get-folder-count.api";
+import { createProfileSummary } from "@/features/profile/model/profile-summary";
+import { ProfileHeader } from "@/features/profile/ui/profile-header";
+import { ProfileRecentFiles } from "@/features/profile/ui/profile-recent-files";
+import { ProfileStats } from "@/features/profile/ui/profile-stats";
+import { ProfileStorageUsage } from "@/features/profile/ui/profile-storage-usage";
+import { createClient } from "@/lib/supabase/server";
 
-const ProfilePage = async () => {
-  const user = await getUserMe();
+export default async function ProfilePage() {
+  const supabase = await createClient();
+  const user = await getCurrentUser(supabase);
+
+  const [files, folderCount] = await Promise.all([
+    getRecentFiles(supabase, user!.id),
+    getFolderCount(supabase, user!.id),
+  ]);
+
+  const summary = createProfileSummary(files, folderCount);
 
   return (
-    <main className="p-4 pt-18 mx-auto max-w-2xl">
-      <header className="mt-4 p-4 bg-rose-200 rounded">
-        <h1 className="text-2xl font-bold opacity-80">프로필</h1>
-        <div className="mt-2 flex justify-between">
-          <div className="">
-            <h2 className="text-sm font-medium opacity-80">{user.username}</h2>
-            <div className="text-sm font-medium opacity-70">
-              가입일: {user.createdAt.substring(0, 10)}
-            </div>
-          </div>
-          <UserRound className="p-2 text-rose-400" size={128} />
-        </div>
-      </header>
-
-      <section className="mt-8">
-        <h4 className="pb-2 text-2xl font-bold opacity-80 border-b">사용량</h4>
-        <UsageChart usage={user.totalSize} />
-        <div className="text-lg font-semibold opacity-80 text-center">
-          총 파일수: {user.fileCount}개
-        </div>
-      </section>
-
-      <section className="mt-8">
-        <h4 className="pb-2 text-2xl font-bold opacity-80 border-b">수정</h4>
-        <UserUpdateForm />
-      </section>
+    <main className="p-4 mx-auto max-w-5xl grid grid-cols-4 gap-4">
+      <ProfileHeader user={user!} summary={summary} />
+      <ProfileStats summary={summary} />
+      <ProfileStorageUsage summary={summary} />
+      <ProfileRecentFiles files={summary.latestFiles} />
+      <ChangePasswordForm />
+      <DeleteAccountDialog />
     </main>
   );
-};
-
-export default ProfilePage;
+}

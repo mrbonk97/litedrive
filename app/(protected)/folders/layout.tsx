@@ -1,23 +1,16 @@
-import { BottomNav } from "@/components/nav/bottom-nav";
+import { DriveTopNav } from "@/features/navigation/ui/drive-top-nav";
 import { Leftnav } from "@/components/nav/left-nav";
-import { Topnav } from "@/components/nav/top-nav";
-import { DnDProvider } from "@/context/dnd-provider";
 
 interface Props {
   children: React.ReactNode;
 }
 
-async function FoldersLayout({ children }: Props) {
+export default function RootLayout({ children }: Props) {
   return (
     <>
+      <DriveTopNav />
       <Leftnav />
-      <DnDProvider>
-        <Topnav />
-        {children}
-      </DnDProvider>
-      <BottomNav />
+      {children}
     </>
   );
 }
-
-export default FoldersLayout;
