@@ -109,6 +109,7 @@ export function ShareTokenForm({ defaultCode = "", className }: Props) {
         <InputOTP
           maxLength={16}
           value={code}
+          containerClassName="flex-col gap-2"
           onChange={(nextCode) => {
             setCode(nextCode);
 
@@ -119,9 +120,17 @@ export function ShareTokenForm({ defaultCode = "", className }: Props) {
           }}
         >
           <InputOTPGroup className="mx-auto">
-            {Array.from({ length: 16 }).map((_, index) => (
+            {Array.from({ length: 8 }).map((_, index) => (
               <InputOTPSlot key={index} index={index} />
             ))}
+          </InputOTPGroup>
+
+          <InputOTPGroup className="mx-auto">
+            {Array.from({ length: 8 }).map((_, index) => {
+              const slotIndex = index + 8;
+
+              return <InputOTPSlot key={slotIndex} index={slotIndex} />;
+            })}
           </InputOTPGroup>
         </InputOTP>
 
