@@ -1,4 +1,4 @@
-import { Logo } from "@/components/logo";
+import { LogoIcon } from "@/components/logo-icon";
 import { getCurrentUser } from "@/features/auth/api/get-current-user.api";
 import { SignUpForm } from "@/features/auth/ui/sign-up-form";
 import { createClient } from "@/lib/supabase/server";
@@ -24,19 +24,16 @@ export default async function SignUpPage() {
   }
 
   return (
-    <main className="p-4 h-svh block lg:flex flex-col items-center justify-center lg:bg-rose-50">
-      <section className="p-4 lg:p-8 lg:max-w-md w-full rounded-lg bg-background lg:shadow-lg">
-        <hgroup>
-          <Logo />
-          <h1 className="mt-4 text-4xl font-bold">회원가입</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            불필요한 개인정보 없이, 안전하고 간편하게 파일을 보관하세요.
-          </p>
-        </hgroup>
+    <main className="p-4 min-h-svh block lg:flex flex-col items-center justify-center lg:bg-rose-50">
+      <section className="mt-4 lg:mt-0 lg:p-8 max-w-md w-full lg:rounded-lg lg:border bg-background">
+        <LogoIcon size="sm" className="block mx-auto lg:mx-0 w-fit" />
+        <h1 className="sr-only lg:not-sr-only lg:mt-4 text-2xl font-bold tracking-tight">
+          회원가입
+        </h1>
         <SignUpForm />
         <div className="lg:h-32" />
       </section>
-      <p className="mt-4 px-4 text-sm text-center text-muted-foreground">
+      <p className="mt-4 max-w-md px-4 text-xs leading-5 text-center text-balance break-keep text-muted-foreground">
         계속 진행하면 Litedrive의{" "}
         <Link
           href="/policy"
