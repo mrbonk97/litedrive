@@ -7,8 +7,8 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { FolderPlus } from "lucide-react";
-import { UploadFileDialog } from "@/features/files/ui/upload-file.dialog";
-import { CreateFolderDialog } from "@/features/folders/ui/create-folder.dialog";
+import { UploadFileDialog } from "@/features/files/ui/upload-file-dialog";
+import { CreateFolderDialog } from "@/features/folders/ui/create-folder-dialog";
 
 export function DriveEmpty() {
   return (

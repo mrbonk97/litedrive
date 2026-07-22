@@ -1,14 +1,14 @@
-import { FolderType } from "@/types";
+import type { FolderType } from "@/types";
+import type { createClient } from "@/lib/supabase/server";
 import { translateSupabaseError } from "@/lib/utils";
+import { AppException, ExceptionCode } from "@/lib/errors";
+
+type SupabaseClient = Awaited<ReturnType<typeof createClient>>;
 
 export async function getFolderBreadcrumb(
-  supabase: Awaited<
-    ReturnType<typeof import("@/lib/supabase/server").createClient>
-  >,
+  supabase: SupabaseClient,
   folderId: string,
-) {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("로그인이 필요합니다.");
+): Promise<FolderType[]> {
   const breadcrumbs: FolderType[] = [];
   const visitedIds = new Set<string>();
 
@@ -16,7 +16,10 @@ export async function getFolderBreadcrumb(
 
   while (currentId) {
     if (visitedIds.has(currentId)) {
-      throw new Error("폴더 경로에 순환 참조가 있습니다.");
+      throw new AppException(
+        ExceptionCode.CONFLICT,
+        "폴더 경로에 순환 참조가 있습니다.",
+      );
     }
     visitedIds.add(currentId);
 
@@ -24,12 +27,14 @@ export async function getFolderBreadcrumb(
       .from("folders")
       .select("*")
       .eq("id", currentId)
-      .eq("user_id", user.id)
       .maybeSingle();
     const folder = data as FolderType | null;
 
     if (error) {
-      throw new Error(translateSupabaseError(error));
+      throw new AppException(
+        ExceptionCode.INTERNAL_ERROR,
+        translateSupabaseError(error),
+      );
     }
 
     if (!folder) {

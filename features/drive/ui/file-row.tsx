@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { FileType } from "@/types";
+import { FileWithAuthorType } from "@/types";
 import { useDndStore } from "@/hooks/use-dnd-store";
 import { formatDate, formatFileSize, getIcon } from "@/lib/utils";
 import {
@@ -13,15 +13,23 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuGroup,
+  ContextMenuItem,
+  ContextMenuLabel,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import { Ellipsis } from "lucide-react";
-import { ShareFileDialog } from "@/features/files/ui/share-file.dialog";
+import { ShareFileDialog } from "@/features/files/ui/share-file-dialog";
 import { RenameFileDialog } from "@/features/files/ui/rename-file-dialog";
-import { DeleteFileDialog } from "@/features/files/ui/delete-file.dialog";
+import { DeleteFileDialog } from "@/features/files/ui/delete-file-dialog";
 import { downloadFile } from "@/features/files/api/download-file.api";
 import { toast } from "sonner";
 
 interface Props {
-  file: FileType;
+  file: FileWithAuthorType;
 }
 
 type FileState = "IDLE" | "DELETE" | "RENAME" | "SHARE";
@@ -57,19 +65,21 @@ export function FileRow({ file }: Props) {
 
   return (
     <>
-      <tr
-        draggable
-        onDragStart={() =>
-          dnd.dragStart({
-            id: file.id,
-            type: "file",
-            parentId: file.folder_id,
-          })
-        }
-        onDragEnd={() => dnd.dragEnd()}
-        onClick={handleDownload}
-        className={`border-b ${canDownload ? "cursor-pointer hover:bg-secondary" : "cursor-not-allowed opacity-70"}`}
-      >
+      <ContextMenu>
+        <ContextMenuTrigger asChild>
+          <tr
+            draggable
+            onDragStart={() =>
+              dnd.dragStart({
+                id: file.id,
+                type: "file",
+                parentId: file.folder_id,
+              })
+            }
+            onDragEnd={() => dnd.dragEnd()}
+            onClick={handleDownload}
+            className={`border-b ${canDownload ? "cursor-pointer hover:bg-secondary" : "cursor-not-allowed opacity-70"}`}
+          >
         <td className="p-2  max-w-1 not-last:border-r">
           <div className="flex items-center gap-2">
             <Image
@@ -83,7 +93,7 @@ export function FileRow({ file }: Props) {
           </div>
         </td>
         <td className="hidden lg:table-cell p-2 text-sm not-last:border-r">
-          {file.user_id.substring(0, 8)}
+          {file.author?.username ?? "알 수 없음"}
         </td>
         <td className="hidden sm:table-cell p-2 text-sm text-right not-last:border-r">
           {formatDate(file.created_at)}
@@ -137,7 +147,39 @@ export function FileRow({ file }: Props) {
             </DropdownMenuContent>
           </DropdownMenu>
         </td>
-      </tr>
+          </tr>
+        </ContextMenuTrigger>
+        <ContextMenuContent>
+          <ContextMenuGroup>
+            <ContextMenuLabel>설정</ContextMenuLabel>
+            <ContextMenuItem
+              onSelect={() => setState("DELETE")}
+              className="cursor-pointer"
+            >
+              삭제
+            </ContextMenuItem>
+            <ContextMenuItem
+              onSelect={() => setState("RENAME")}
+              className="cursor-pointer"
+            >
+              이름 변경
+            </ContextMenuItem>
+            <ContextMenuItem
+              onSelect={() => setState("SHARE")}
+              className="cursor-pointer"
+            >
+              파일 공유
+            </ContextMenuItem>
+            <ContextMenuItem
+              disabled={isDownloading || !canDownload}
+              onSelect={handleDownload}
+              className="cursor-pointer"
+            >
+              {isDownloading ? "다운로드 중..." : "다운로드"}
+            </ContextMenuItem>
+          </ContextMenuGroup>
+        </ContextMenuContent>
+      </ContextMenu>
       <DeleteFileDialog
         open={state == "DELETE"}
         onOpenChange={() => setState("IDLE")}

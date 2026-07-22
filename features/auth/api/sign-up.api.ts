@@ -12,6 +12,9 @@ export async function signUp(
     email: createInternalEmail(username),
     password: password,
     options: {
+      data: {
+        username: username.toLowerCase(),
+      },
       emailRedirectTo: `${window.location.origin}/folders`,
     },
   });

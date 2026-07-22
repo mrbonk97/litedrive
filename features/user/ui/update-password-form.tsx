@@ -14,16 +14,16 @@ import {
 } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/spinner";
-import { changePasswordSchema } from "@/features/auth/schema/change-password.schema";
-import { changePassword } from "@/features/auth/api/change-password.api";
+import { updatePasswordSchema } from "@/features/user/schema/update-password.schema";
+import { updatePassword } from "@/features/user/api/update-password.api";
 import { translateSupabaseError } from "@/lib/utils";
 
-export function ChangePasswordForm() {
+export function UpdatePasswordForm() {
   const router = useRouter();
   const supabase = createClient();
 
-  const form = useForm<z.infer<typeof changePasswordSchema>>({
-    resolver: zodResolver(changePasswordSchema),
+  const form = useForm<z.infer<typeof updatePasswordSchema>>({
+    resolver: zodResolver(updatePasswordSchema),
     defaultValues: {
       oldPassword: "",
       newPassword: "",
@@ -31,8 +31,8 @@ export function ChangePasswordForm() {
     },
   });
 
-  async function onSubmit(data: z.infer<typeof changePasswordSchema>) {
-    const { error } = await changePassword(
+  async function onSubmit(data: z.infer<typeof updatePasswordSchema>) {
+    const { error } = await updatePassword(
       supabase,
       data.oldPassword,
       data.newPassword,

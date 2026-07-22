@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { deleteR2Object } from "@/features/files/api/file-transfer.api";
+import { deleteR2Object } from "@/lib/storage/r2";
 import { translateSupabaseError } from "@/lib/utils";
 
 type DeleteFileResult = {
@@ -11,20 +11,10 @@ type DeleteFileResult = {
 export async function deleteFile(fileId: string): Promise<DeleteFileResult> {
   const supabase = await createClient();
 
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser();
-
-  if (userError || !user) {
-    return { error: "로그인이 필요합니다." };
-  }
-
   const { data: file, error: fileError } = await supabase
     .from("files")
-    .select("id, name, user_id")
+    .select("id, storage_path")
     .eq("id", fileId)
-    .eq("user_id", user.id)
     .single();
 
   if (fileError || !file) {
@@ -32,7 +22,7 @@ export async function deleteFile(fileId: string): Promise<DeleteFileResult> {
   }
 
   try {
-    await deleteR2Object(user.id, file.id, file.name);
+    await deleteR2Object(file.storage_path);
   } catch (error) {
     return {
       error:
@@ -45,8 +35,7 @@ export async function deleteFile(fileId: string): Promise<DeleteFileResult> {
   const { error: deleteError } = await supabase
     .from("files")
     .delete()
-    .eq("id", file.id)
-    .eq("user_id", user.id);
+    .eq("id", file.id);
 
   if (deleteError) {
     return { error: translateSupabaseError(deleteError) };

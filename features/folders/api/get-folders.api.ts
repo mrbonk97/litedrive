@@ -1,6 +1,7 @@
-import { FolderType } from "@/types";
+import { FolderWithAuthorType } from "@/types";
 import type { createClient } from "@/lib/supabase/server";
 import { translateSupabaseError } from "@/lib/utils";
+import { AppException, ExceptionCode } from "@/lib/errors";
 
 type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
@@ -8,10 +9,10 @@ export async function getFolders(
   supabase: SupabaseServerClient,
   parentId: string | null,
   searchQuery?: string,
-): Promise<FolderType[]> {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("로그인이 필요합니다.");
-  let query = supabase.from("folders").select("*").eq("user_id", user.id);
+): Promise<FolderWithAuthorType[]> {
+  let query = supabase
+    .from("folders")
+    .select("*, author:profiles!folders_user_profile_fkey(username)");
   const trimmedQuery = searchQuery?.trim();
 
   if (trimmedQuery) {
@@ -28,8 +29,11 @@ export async function getFolders(
   });
 
   if (error) {
-    throw new Error(translateSupabaseError(error));
+    throw new AppException(
+      ExceptionCode.INTERNAL_ERROR,
+      translateSupabaseError(error),
+    );
   }
 
-  return data ?? [];
+  return (data as FolderWithAuthorType[] | null) ?? [];
 }

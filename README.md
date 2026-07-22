@@ -11,7 +11,8 @@
 - 파일명 검색
 - 공유 코드 기반 공개 파일 전달
 - 파일 수, 폴더 수, 최근 파일 및 저장 공간 현황 확인
-- 계정 비밀번호 변경과 재인증 기반 회원 탈퇴
+- 계정 비밀번호 변경과 확인 대화상자 기반 회원탈퇴
+- 파일 7일 자동 삭제 설정
 - 반응형 랜딩, 드라이브 및 프로필 UI
 
 ## 기술 스택
@@ -30,12 +31,13 @@
 ```text
 app/                    라우팅, layout, page, metadata route
 features/               기능별 UI와 서버/클라이언트 로직
-  auth/                 인증 및 계정 관리
+  auth/                 로그인, 회원가입, 현재 사용자 조회
   drive/                드라이브 목록과 파일/폴더 이동
   files/                파일 전송과 파일 작업
   folders/              폴더 작업
   profile/              프로필 통계
   share/                공개 공유 파일 조회와 다운로드
+  user/                 비밀번호, 회원탈퇴, 자동 삭제 설정
 components/             여러 기능에서 공유하는 UI
 lib/                    Supabase client와 공통 인프라
 supabase/migrations/    RLS, trigger, DB 함수 migration
@@ -57,8 +59,27 @@ app → features → components / lib
 3. 서버가 파일 UUID와 사용자 전용 R2 경로를 생성합니다.
 4. DB에 `pending` 메타데이터를 저장하고 5분 만료 전송 토큰을 발급합니다.
 5. 클라이언트가 Worker를 통해 R2로 파일을 전송합니다.
-6. 서버가 R2 객체의 실제 크기를 확인한 뒤 상태를 `success`로 변경합니다.
-7. 검증 또는 완료 처리 실패 시 객체 삭제와 `fail` 상태 전환을 시도합니다.
+6. Worker가 streaming 중 실제 전송량이 10MB를 넘으면 즉시 중단하고 `413`을 반환합니다.
+7. 서버가 R2 객체의 실제 크기를 확인한 뒤 상태를 `success`로 변경합니다.
+8. Worker 또는 검증 실패 시 `fail` 상태로 전환합니다.
+
+파일 상태는 `pending`, `success`, `fail` PostgreSQL enum으로 제한됩니다.
+
+### Cloudflare Worker
+
+Worker 코드는 `cloudflare/worker.ts`에 있습니다. 배포 전에
+`cloudflare/wrangler.example.jsonc`를 `cloudflare/wrangler.jsonc`로 복사하고
+R2 bucket 이름과 허용할 앱 Origin을 설정합니다.
+
+Worker의 `JWT_SECRET`은 Next.js 서버의 `JWT_SECRET`과 반드시 같아야 합니다.
+
+```bash
+cd cloudflare
+pnpm dlx wrangler secret put JWT_SECRET
+pnpm dlx wrangler deploy --config wrangler.jsonc
+```
+
+배포된 Worker URL을 Next.js의 `NEXT_PUBLIC_WORKER_ENDPOINT`로 설정합니다.
 
 ### 공개 파일 공유
 
@@ -72,7 +93,8 @@ app → features → components / lib
 
 - 클라이언트가 전달한 사용자 ID를 권한 판단에 사용하지 않습니다.
 - 서버 작업은 `supabase.auth.getUser()`로 현재 사용자를 다시 확인합니다.
-- 파일과 폴더 쿼리에 `user_id` 소유권 조건을 적용합니다.
+- 파일과 폴더는 RLS로 사용자별 행 접근을 제한합니다.
+- 작성자 아이디는 `profiles` 관계를 join해 조회합니다.
 - Supabase RLS가 사용자별 행 접근을 한 번 더 제한하도록 migration을 제공합니다.
 - DB trigger가 다른 사용자 폴더를 부모로 지정하는 교차 소유 관계를 차단합니다.
 - 사용자별 advisory lock과 quota trigger로 동시 업로드의 용량 제한 우회를 완화합니다.
@@ -80,7 +102,8 @@ app → features → components / lib
 - R2 access key, Supabase secret key와 전송 토큰 secret은 서버에서만 사용합니다.
 - 파일 전송 토큰은 operation을 구분하며 5분 후 만료됩니다.
 - 공유 조회는 입력 형식 제한과 요청 횟수 제한을 적용합니다.
-- 계정 삭제는 비밀번호 재인증 후 진행합니다.
+- 계정 삭제는 서버에서 현재 사용자를 다시 확인한 후 진행합니다.
+- 자동 삭제 batch endpoint는 `CRON_SECRET` Bearer 인증을 요구합니다.
 
 > `supabase/migrations`의 정책은 migration 파일을 실제 대상 DB에 적용해야 효력이 생깁니다. 파일이 저장소에 존재하는 것만으로 운영 DB의 RLS 적용을 보장하지 않습니다.
 
@@ -117,6 +140,7 @@ R2_ENDPOINT=
 R2_BUCKET_NAME=
 R2_ACCESS_KEY_ID=
 R2_SECRET_ACCESS_KEY=
+CRON_SECRET=
 ```
 
 `SUPABASE_SECRET_KEY`, `JWT_SECRET`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`에는 절대로 `NEXT_PUBLIC_` 접두사를 붙이지 마세요.
@@ -131,10 +155,13 @@ pnpm dev
 
 ## 데이터베이스
 
-현재 보안 migration은 다음 파일에 있습니다.
+현재 migration은 다음 파일에 있습니다.
 
 ```text
 supabase/migrations/20260710000000_harden_drive_authorization.sql
+supabase/migrations/20260722000000_add_auto_delete.sql
+supabase/migrations/20260722010000_add_profiles.sql
+supabase/migrations/20260722020000_create_file_upload_status.sql
 ```
 
 이 migration에는 다음 항목이 포함됩니다.
@@ -144,6 +171,9 @@ supabase/migrations/20260710000000_harden_drive_authorization.sql
 - 500MB 저장 공간 제한 trigger
 - 공유 토큰 unique index
 - 공유 활성화/비활성화 DB 함수와 실행 권한
+- 사용자별 자동 삭제 설정, 파일 만료 시각과 관련 RLS/trigger
+- Auth 사용자와 동기화되는 공개 프로필 및 파일·폴더 작성자 관계
+- `pending`, `success`, `fail` 파일 업로드 상태 enum
 
 Migration은 대상 환경과 기존 schema를 검토한 뒤 별도로 적용해야 합니다. 애플리케이션 실행만으로 자동 적용되지 않습니다.
 

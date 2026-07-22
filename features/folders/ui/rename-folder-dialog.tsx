@@ -27,7 +27,7 @@ import { Spinner } from "@/components/spinner";
 
 import { FolderType } from "@/types";
 
-import { renameFolder } from "../api/rename-folder.api";
+import { updateFolder } from "../api/update-folder.api";
 import { renameFolderSchema } from "../schema/rename-folder.schema";
 
 interface Props {
@@ -48,7 +48,7 @@ export function RenameFolderDialog({ open, onOpenChange, folder }: Props) {
 
   async function onSubmit(data: z.infer<typeof renameFolderSchema>) {
     try {
-      await renameFolder(folder.id, data.name);
+      await updateFolder(folder.id, { name: data.name });
       toast.success("폴더 이름을 변경했습니다.");
       onOpenChange();
       router.refresh();

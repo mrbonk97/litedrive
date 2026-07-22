@@ -17,8 +17,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/spinner";
 import { createClient } from "@/lib/supabase/client";
-import { UploadFileDialog } from "@/features/files/ui/upload-file.dialog";
-import { CreateFolderDialog } from "@/features/folders/ui/create-folder.dialog";
+import { UploadFileDialog } from "@/features/files/ui/upload-file-dialog";
+import { CreateFolderDialog } from "@/features/folders/ui/create-folder-dialog";
 import { useState } from "react";
 
 export function MenuButton() {

@@ -13,9 +13,9 @@ import {
   ContextMenuLabel,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { DeleteFileDialog } from "@/features/files/ui/delete-file.dialog";
+import { DeleteFileDialog } from "@/features/files/ui/delete-file-dialog";
 import { RenameFileDialog } from "@/features/files/ui/rename-file-dialog";
-import { ShareFileDialog } from "@/features/files/ui/share-file.dialog";
+import { ShareFileDialog } from "@/features/files/ui/share-file-dialog";
 import { downloadFile } from "@/features/files/api/download-file.api";
 import { toast } from "sonner";
 

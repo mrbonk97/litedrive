@@ -14,8 +14,8 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { Folder, FolderOpen } from "lucide-react";
-import { DeleteFolderDialog } from "@/features/folders/ui/delete-folder.dialog";
-import { RenameFolderDialog } from "@/features/folders/ui/rename-folder.dialog";
+import { DeleteFolderDialog } from "@/features/folders/ui/delete-folder-dialog";
+import { RenameFolderDialog } from "@/features/folders/ui/rename-folder-dialog";
 
 interface Props {
   folder: FolderType;

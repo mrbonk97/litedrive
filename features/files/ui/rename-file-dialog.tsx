@@ -24,7 +24,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { renameFile } from "../api/rename-file.api";
+import { updateFile } from "../api/update-file.api";
 import { renameFileSchema } from "../schema/rename-file.schema";
 
 interface Props {
@@ -52,7 +52,7 @@ export function RenameFileDialog({ open, onOpenChange, file }: Props) {
     }
 
     try {
-      await renameFile(file.id, nextName);
+      await updateFile(file.id, { name: nextName });
       toast.success("파일 이름을 변경했습니다.");
       onOpenChange(false);
       router.refresh();

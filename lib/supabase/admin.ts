@@ -1,15 +1,16 @@
 import { createClient } from "@supabase/supabase-js";
+import { AppException, ExceptionCode } from "@/lib/errors";
 
 export function createAdminClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const secretKey = process.env.SUPABASE_SECRET_KEY;
 
   if (!supabaseUrl) {
-    throw new Error("NEXT_PUBLIC_SUPABASE_URL is missing.");
+    throw new AppException(ExceptionCode.CONFIGURATION_ERROR);
   }
 
   if (!secretKey) {
-    throw new Error("SUPABASE_SECRET_KEY is missing.");
+    throw new AppException(ExceptionCode.CONFIGURATION_ERROR);
   }
 
   return createClient(supabaseUrl, secretKey, {

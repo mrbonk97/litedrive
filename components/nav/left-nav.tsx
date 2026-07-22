@@ -1,8 +1,8 @@
 import { HardDrive } from "lucide-react";
 
 import { Logo } from "../logo";
-import { CreateFolderDialog } from "@/features/folders/ui/create-folder.dialog";
-import { UploadFileDialog } from "@/features/files/ui/upload-file.dialog";
+import { CreateFolderDialog } from "@/features/folders/ui/create-folder-dialog";
+import { UploadFileDialog } from "@/features/files/ui/upload-file-dialog";
 import { createClient } from "@/lib/supabase/server";
 import { formatFileSize } from "@/lib/utils";
 

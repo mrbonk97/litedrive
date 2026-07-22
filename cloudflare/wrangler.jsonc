@@ -1,0 +1,12 @@
+{
+  "name": "litedrive-worker",
+  "main": "worker.ts",
+  "compatibility_date": "2026-07-22",
+  "keep_vars": true,
+  "r2_buckets": [
+    {
+      "binding": "MY_BUCKET",
+      "bucket_name": "litedrive",
+    },
+  ],
+}

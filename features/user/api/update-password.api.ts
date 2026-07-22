@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/client";
 
 type SupabaseClient = ReturnType<typeof createClient>;
 
-export async function changePassword(
+export async function updatePassword(
   client: SupabaseClient,
   oldPassword: string,
   newPassword: string,

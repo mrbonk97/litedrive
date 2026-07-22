@@ -4,13 +4,13 @@ import { AppException, ExceptionCode } from "@/lib/errors";
 
 type SupabaseClient = Awaited<ReturnType<typeof createClient>>;
 
-export async function getFolderCount(supabase: SupabaseClient) {
-  const { count, error } = await supabase
-    .from("folders")
-    .select("id", {
-      count: "exact",
-      head: true,
-    });
+export async function getAutoDeleteEnabled(
+  supabase: SupabaseClient,
+) {
+  const { data, error } = await supabase
+    .from("user_settings")
+    .select("auto_delete_enabled")
+    .maybeSingle();
 
   if (error) {
     throw new AppException(
@@ -19,5 +19,5 @@ export async function getFolderCount(supabase: SupabaseClient) {
     );
   }
 
-  return count ?? 0;
+  return data?.auto_delete_enabled ?? false;
 }

@@ -23,8 +23,8 @@ export interface ProfileSummary {
 }
 
 function getUsageLabel(percent: number) {
-  if (percent >= 90) return "정리가 필요해요";
-  if (percent >= 70) return "넉넉하진 않아요";
+  if (percent >= 90) return "정리가 필요합니다.";
+  if (percent >= 70) return "넉넉하진 않습니다.";
   if (percent >= 35) return "안정적으로 사용 중";
   return "여유 공간 충분";
 }

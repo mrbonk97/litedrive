@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { getFiles } from "@/features/files/api/get-files.api";
 import { getFolders } from "@/features/folders/api/get-folders.api";
-import { getFolderBreadcrumb } from "@/features/folders/queries";
+import { getFolderBreadcrumb } from "@/features/folders/api/get-folder-breadcrumb.api";
 import { DriveHeader } from "@/features/drive/ui/drive-header";
 import { DriveGrid } from "@/features/drive/ui/drive-grid";
 import { DriveTable } from "@/features/drive/ui/drive-table";

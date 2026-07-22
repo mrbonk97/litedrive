@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { FolderType } from "@/types";
+import { FolderWithAuthorType } from "@/types";
 import { formatDate } from "@/lib/utils";
 import { useDndStore } from "@/hooks/use-dnd-store";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -14,12 +14,20 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuGroup,
+  ContextMenuItem,
+  ContextMenuLabel,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import { Ellipsis, Folder, FolderOpen } from "lucide-react";
-import { DeleteFolderDialog } from "@/features/folders/ui/delete-folder.dialog";
-import { RenameFolderDialog } from "@/features/folders/ui/rename-folder.dialog";
+import { DeleteFolderDialog } from "@/features/folders/ui/delete-folder-dialog";
+import { RenameFolderDialog } from "@/features/folders/ui/rename-folder-dialog";
 
 interface Props {
-  folder: FolderType;
+  folder: FolderWithAuthorType;
 }
 
 type FolderState = "IDLE" | "DELETE" | "RENAME";
@@ -40,48 +48,50 @@ export function FolderRow({ folder }: Props) {
 
   return (
     <>
-      <tr
-        draggable
-        onDragStart={() =>
-          dnd.dragStart({
-            id: folder.id,
-            type: "folder",
-            parentId: folder.parent_id,
-          })
-        }
-        onDragEnd={() => dnd.dragEnd()}
-        onDragEnter={(event) => {
-          event.preventDefault();
+      <ContextMenu>
+        <ContextMenuTrigger asChild>
+          <tr
+            draggable
+            onDragStart={() =>
+              dnd.dragStart({
+                id: folder.id,
+                type: "folder",
+                parentId: folder.parent_id,
+              })
+            }
+            onDragEnd={() => dnd.dragEnd()}
+            onDragEnter={(event) => {
+              event.preventDefault();
 
-          dnd.dragEnter({
-            id: folder.id,
-            type: "folder",
-          });
-        }}
-        onDragOver={(event) => {
-          event.preventDefault();
-          event.dataTransfer.dropEffect = "move";
+              dnd.dragEnter({
+                id: folder.id,
+                type: "folder",
+              });
+            }}
+            onDragOver={(event) => {
+              event.preventDefault();
+              event.dataTransfer.dropEffect = "move";
 
-          dnd.dragEnter({
-            id: folder.id,
-            type: "folder",
-          });
-        }}
-        onDragLeave={() => dnd.dragLeave()}
-        onDrop={(event) => {
-          event.preventDefault();
+              dnd.dragEnter({
+                id: folder.id,
+                type: "folder",
+              });
+            }}
+            onDragLeave={() => dnd.dragLeave()}
+            onDrop={(event) => {
+              event.preventDefault();
 
-          void dnd.dropOnFolder(
-            {
-              id: folder.id,
-              type: "folder",
-            },
-            () => router.refresh(),
-          );
-        }}
-        className={`transition-colors border-b
-          ${isDropTarget ? "bg-rose-50 outline-2 -outline-offset-2 outline-rose-400 outline-dashed" : ""}`}
-      >
+              void dnd.dropOnFolder(
+                {
+                  id: folder.id,
+                  type: "folder",
+                },
+                () => router.refresh(),
+              );
+            }}
+            className={`transition-colors border-b
+              ${isDropTarget ? "bg-rose-50 outline-2 -outline-offset-2 outline-rose-400 outline-dashed" : ""}`}
+          >
         <td className="p-2 max-w-1 not-last:border-r">
           <Link
             href={folderHref}
@@ -104,7 +114,7 @@ export function FolderRow({ folder }: Props) {
         </td>
 
         <td className="hidden lg:table-cell p-2 text-left text-sm not-last:border-r">
-          {folder.user_id.substring(0, 8)}
+          {folder.author?.username ?? "알 수 없음"}
         </td>
 
         <td className="p-2 hidden sm:table-cell text-sm text-right not-last:border-r">
@@ -143,7 +153,26 @@ export function FolderRow({ folder }: Props) {
             </DropdownMenuContent>
           </DropdownMenu>
         </td>
-      </tr>
+          </tr>
+        </ContextMenuTrigger>
+        <ContextMenuContent>
+          <ContextMenuGroup>
+            <ContextMenuLabel>설정</ContextMenuLabel>
+            <ContextMenuItem
+              onSelect={() => setState("DELETE")}
+              className="cursor-pointer"
+            >
+              삭제
+            </ContextMenuItem>
+            <ContextMenuItem
+              onSelect={() => setState("RENAME")}
+              className="cursor-pointer"
+            >
+              이름 변경
+            </ContextMenuItem>
+          </ContextMenuGroup>
+        </ContextMenuContent>
+      </ContextMenu>
 
       <DeleteFolderDialog
         open={state === "DELETE"}

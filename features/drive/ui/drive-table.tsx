@@ -1,10 +1,10 @@
-import { FileType, FolderType } from "@/types";
+import { FileWithAuthorType, FolderWithAuthorType } from "@/types";
 import { FileRow } from "@/features/drive/ui/file-row";
 import { FolderRow } from "@/features/drive/ui/folder-row";
 
 interface Props {
-  folders: FolderType[];
-  files: FileType[];
+  folders: FolderWithAuthorType[];
+  files: FileWithAuthorType[];
 }
 
 export function DriveTable({ folders, files }: Props) {

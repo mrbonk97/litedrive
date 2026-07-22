@@ -1,21 +1,19 @@
-import { FileType } from "@/types";
+import { FileWithAuthorType } from "@/types";
 import type { createClient } from "@/lib/supabase/server";
 import { translateSupabaseError } from "@/lib/utils";
+import { AppException, ExceptionCode } from "@/lib/errors";
 
-type supabaseClient = Awaited<ReturnType<typeof createClient>>;
+type SupabaseClient = Awaited<ReturnType<typeof createClient>>;
 
 export async function getFiles(
-  supabase: supabaseClient,
+  supabase: SupabaseClient,
   folderId: string | null,
   searchQuery?: string,
-): Promise<FileType[]> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) throw new Error("로그인이 필요합니다.");
-
-  let query = supabase.from("files").select("*").eq("user_id", user.id);
+): Promise<FileWithAuthorType[]> {
+  let query = supabase
+    .from("files")
+    .select("*, author:profiles!files_user_profile_fkey(username)")
+    .in("upload_status", ["pending", "success"]);
 
   const trimmedQuery = searchQuery?.trim();
 
@@ -34,8 +32,11 @@ export async function getFiles(
   });
 
   if (error) {
-    throw new Error(translateSupabaseError(error));
+    throw new AppException(
+      ExceptionCode.INTERNAL_ERROR,
+      translateSupabaseError(error),
+    );
   }
 
-  return data ?? [];
+  return (data as FileWithAuthorType[] | null) ?? [];
 }

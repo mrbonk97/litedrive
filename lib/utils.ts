@@ -1,5 +1,6 @@
 import { twMerge } from "tailwind-merge";
 import { clsx, type ClassValue } from "clsx";
+import { AppException } from "@/lib/errors";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -144,6 +145,10 @@ export function translateSupabaseError(
   error: unknown,
   fallback = "요청 처리 중 오류가 발생했습니다.",
 ) {
+  if (error instanceof AppException) {
+    return error.message;
+  }
+
   const message =
     typeof error === "string"
       ? error

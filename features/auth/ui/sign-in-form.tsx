@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -44,7 +43,9 @@ export function SignInForm() {
         return;
       }
 
-      toast.error(translateSupabaseError(error, "로그인 중 오류가 발생했습니다."));
+      toast.error(
+        translateSupabaseError(error, "로그인 중 오류가 발생했습니다."),
+      );
     }
   }
 

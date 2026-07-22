@@ -1,6 +1,7 @@
 import { toast } from "sonner";
 import type { StateCreator } from "zustand";
-import { moveDriveItem } from "@/features/drive/api/move-drive-item.api";
+import { updateFile } from "@/features/files/api/update-file.api";
+import { updateFolder } from "@/features/folders/api/update-folder.api";
 
 export type DragItem = {
   id: string;
@@ -80,11 +81,11 @@ export const createDndSlice: StateCreator<DndSlice, [], [], DndSlice> = (
     });
 
     try {
-      await moveDriveItem({
-        id: draggedItem.id,
-        type: draggedItem.type,
-        targetFolderId: target.id,
-      });
+      if (draggedItem.type === "file") {
+        await updateFile(draggedItem.id, { folderId: target.id });
+      } else {
+        await updateFolder(draggedItem.id, { parentId: target.id });
+      }
       toast.success(
         draggedItem.type === "file"
           ? "파일을 이동했습니다."
