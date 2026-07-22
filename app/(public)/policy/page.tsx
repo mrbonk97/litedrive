@@ -7,7 +7,8 @@ import { getCurrentUser } from "@/features/auth/api/get-current-user.api";
 
 export const metadata: Metadata = {
   title: "이용약관",
-  description: "LiteDrive 서비스 이용조건과 회원 및 운영자의 권리와 의무를 안내합니다.",
+  description:
+    "LiteDrive 서비스 이용조건과 회원 및 운영자의 권리와 의무를 안내합니다.",
   alternates: {
     canonical: "/policy",
   },
@@ -46,7 +47,7 @@ export default async function PolicyPage() {
     <>
       <UserTopNav user={user} />
       <main className="p-4 mx-auto max-w-5xl">
-        <header>
+        <header className="mt-8">
           <h1 className="text-4xl font-bold tracking-tight">이용약관</h1>
           <p className="mt-2 text-lg font-medium text-muted-foreground">
             Litedrive 이용약관

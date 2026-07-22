@@ -9,7 +9,8 @@ const PRIVACY_EMAIL = "privacy@hypersoso.com";
 
 export const metadata: Metadata = {
   title: "개인정보 처리방침",
-  description: "LiteDrive가 처리하는 개인정보 항목, 이용 목적, 보관 및 파기 기준을 안내합니다.",
+  description:
+    "LiteDrive가 처리하는 개인정보 항목, 이용 목적, 보관 및 파기 기준을 안내합니다.",
   alternates: {
     canonical: "/privacy",
   },
@@ -84,7 +85,7 @@ export default async function PrivacyPage() {
     <>
       <UserTopNav user={user} />
       <main className="p-4 mx-auto max-w-5xl">
-        <header>
+        <header className="mt-8">
           <h1 className="text-4xl font-bold tracking-tight">
             개인정보처리방침
           </h1>
